@@ -12,16 +12,19 @@ import androidx.activity.result.contract.ActivityResultContracts.StartActivityFo
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
-import com.androidnetworking.interfaces.JSONObjectRequestListener
-import com.androidnetworking.interfaces.StringRequestListener
-import com.androidnetworking.model.MultipartFileBody
+import com.androidnetworking.interceptors.HttpLoggingInterceptor
+import com.androidnetworking.interfaces.OkHttpResponseAndStringRequestListener
 import no.exam.android.Globals
 import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.R
-import org.json.JSONObject
+import okhttp3.Response
 import java.io.File
+import kotlin.concurrent.thread
 
 class MainActivity : AppCompatActivity() {
+    private var imageUri: Uri? = null
+    private var imageView: ImageView? = null
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -30,33 +33,40 @@ class MainActivity : AppCompatActivity() {
             val intent = Intent(this, ResultsActivity::class.java)
             startActivity(intent)
         }
+        AndroidNetworking.initialize(applicationContext)
+        AndroidNetworking.enableLogging(HttpLoggingInterceptor.Level.HEADERS)
 
         findViewById<Button>(R.id.UploadBtn).setOnClickListener { postImageToApi() }
     }
 
     private fun postImageToApi() {
-        if (imageView == null) return
-        if (imageUrl == null) return
+        if (imageView == null || imageUri == null) {
+            return
+        }
+        val file = File.createTempFile("tmp", ".png")
 
-        val content = mapOf("image" to imageUrl)
-
-        Log.i(Globals.TAG, imageUrl.toString())
-        AndroidNetworking.post("$API_URL/upload")
-            .setContentType("multipart/form-data")
-            .addBodyParameter(content)
-            .build()
-            .getAsString(object: StringRequestListener {
-                override fun onResponse(response: String?) {
-                    Log.i(Globals.TAG, response.toString())
+        with(contentResolver.openInputStream(imageUri!!)) {
+            file.writeBytes(this!!.readBytes())
+        }
+        //TODO: Change this thread to use concurrency instead
+        thread {
+            AndroidNetworking.upload("$API_URL/upload")
+                .addMultipartFile("image", file)
+                .build()
+                .setUploadProgressListener { bytesUploaded, totalBytes ->
+                    Log.d(Globals.TAG, "Uploaded: $bytesUploaded | Total: $totalBytes")
                 }
-
-                override fun onError(anError: ANError) {
-                    Log.e(Globals.TAG, "ERROR in postImageToApi method! Message: ${anError.errorBody}")
-                }
-            })
+                .getAsOkHttpResponseAndString(object : OkHttpResponseAndStringRequestListener {
+                    override fun onResponse(response: Response?, string: String) {
+                        Log.d(Globals.TAG, "Response url: $string")
+                    }
+                    override fun onError(anError: ANError?) {
+                        Log.e(Globals.TAG, anError?.cause.toString())
+                        Log.e(Globals.TAG, anError?.errorBody.toString())
+                    }
+                })
+        }
     }
-
-    private var imageView: ImageView? = null
 
     private fun addImage(view: ImageView) {
         imageView = view
@@ -65,14 +75,13 @@ class MainActivity : AppCompatActivity() {
         resultLauncher.launch(intent)
     }
 
-    private var imageUrl: String? = null
-
     private val resultLauncher = registerForActivityResult(StartActivityForResult()) {
         if (it.resultCode == Activity.RESULT_OK) {
             val urlToString = it.data?.data.toString()
-            imageUrl = urlToString
-            val stream = contentResolver.openInputStream(Uri.parse(urlToString))
-            imageView?.setImageDrawable(Drawable.createFromStream(stream, urlToString))
+            imageUri = Uri.parse(urlToString)
+            with(contentResolver.openInputStream(Uri.parse(urlToString))) {
+                imageView?.setImageDrawable(Drawable.createFromStream(this, urlToString))
+            }
         }
     }
 }

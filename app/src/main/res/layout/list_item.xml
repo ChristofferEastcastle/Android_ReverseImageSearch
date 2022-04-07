@@ -9,8 +9,8 @@
     <com.google.android.material.imageview.ShapeableImageView
             android:id="@+id/list_image"
             android:layout_width="match_parent"
-            android:layout_height="500dp"
-            android:layout_margin="50dp"
+            android:layout_height="wrap_content"
+            android:layout_margin="30dp"
             tools:layout_editor_absoluteX="155dp"
             app:layout_constraintTop_toTopOf="parent"
             app:layout_constraintStart_toStartOf="parent"

@@ -6,9 +6,9 @@ import android.view.ViewGroup
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
 import no.exam.android.R
-import no.exam.android.models.Results
+import no.exam.android.models.Image
 
-class ResultsAdapter(private val imageList: ArrayList<Results>) : RecyclerView.Adapter<ResultsAdapter.ViewHolder>() {
+class ImageAdapter(private val imageList: ArrayList<Image>) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item,

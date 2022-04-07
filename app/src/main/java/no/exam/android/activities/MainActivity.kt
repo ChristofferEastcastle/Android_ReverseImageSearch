@@ -39,7 +39,7 @@ class MainActivity : AppCompatActivity() {
         if (it.resultCode == Activity.RESULT_OK) {
             val urlToString = it.data?.data.toString()
             val stream = contentResolver.openInputStream(Uri.parse(urlToString))
-            imageView?.background = (Drawable.createFromStream(stream, urlToString))
+            imageView?.setImageDrawable(Drawable.createFromStream(stream, urlToString))
         }
     }
 }

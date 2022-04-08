@@ -1,5 +1,3 @@
 package no.exam.android.models
 
-data class Image(val image: Int) {
-
-}
+data class Image(val image: Int)

@@ -19,10 +19,11 @@
                 android:text="@string/results" />
 
         <Button
+                android:id="@+id/ShowAllBtn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:tag="2"
+                android:tag="3"
                 android:text="Show All" />
     </LinearLayout>
 

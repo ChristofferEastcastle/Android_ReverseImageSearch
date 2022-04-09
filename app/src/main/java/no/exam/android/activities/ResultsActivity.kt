@@ -48,7 +48,7 @@ class ResultsActivity : AppCompatActivity() {
                 .build()
                 .getAsBitmap(object : BitmapRequestListener {
                     override fun onResponse(bitmap: Bitmap?) {
-                        bitmap?.let { imageBitmapList.get(index).bitmap)) }
+
                     }
 
                     override fun onError(anError: ANError?) {

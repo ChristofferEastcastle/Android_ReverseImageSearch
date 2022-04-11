@@ -9,10 +9,12 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:tag="1"
+                android:onClick="switchFragments"
                 android:text="@string/add_new" />
 
         <Button
                 android:id="@+id/ResultsBtn"
+                android:onClick="switchFragments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"

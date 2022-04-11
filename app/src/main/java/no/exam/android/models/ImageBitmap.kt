@@ -1,7 +1,11 @@
 package no.exam.android.models
 
 import android.graphics.Bitmap
-import java.io.Serializable
+import android.graphics.BitmapFactory
+import android.os.Parcel
+import android.os.Parcelable
+import java.io.ByteArrayOutputStream
 
-data class ImageBitmap(val bitmap: Bitmap) : Serializable {
+data class ImageBitmap(val bitmap: Bitmap) {
+
 }

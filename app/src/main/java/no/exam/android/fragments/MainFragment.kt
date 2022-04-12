@@ -11,15 +11,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import kotlinx.coroutines.*
 import no.exam.android.R
-import no.exam.android.activities.ResultsActivity
 import no.exam.android.utils.Network
 import java.io.File
 
-class MainFragment : Fragment() {
+class MainFragment(val bitmaps: ArrayList<Bitmap>) : Fragment() {
     private var imageUri: Uri? = null
     private var imageView: ImageView? = null
     private val scope = MainScope()
@@ -53,10 +53,10 @@ class MainFragment : Fragment() {
 
             for (job in jobs) {
                 val bitmap = job.await() ?: continue
-                withContext(Dispatchers.Main) {
-                    imageView?.setImageBitmap(bitmap)
-                }
-                delay(3000)
+                bitmaps.add(bitmap)
+            }
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Finished downloading. Go to results!", Toast.LENGTH_LONG).show()
             }
         }
     }
@@ -83,7 +83,8 @@ class MainFragment : Fragment() {
             val urlToString = it.data?.data.toString()
             imageUri = Uri.parse(urlToString)
             with(requireActivity().contentResolver.openInputStream(Uri.parse(urlToString))) {
-                imageView?.setImageDrawable(android.graphics.drawable.Drawable.createFromStream(this, urlToString))
+
+                imageView?.setImageDrawable(Drawable.createFromStream(this, urlToString))
             }
         }
     }

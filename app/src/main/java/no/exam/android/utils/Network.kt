@@ -2,6 +2,7 @@ package no.exam.android.utils
 
 import android.graphics.Bitmap
 import android.util.Log
+import android.widget.Toast
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.BitmapRequestListener
@@ -40,7 +41,6 @@ object Network {
 
     suspend fun postImageToApi(imageFile: File): String? {
         var responseUrl: String? = null
-        var callbackCalled = false
         val latch = CountDownLatch(1)
         withContext(Dispatchers.IO) {
             AndroidNetworking.upload("${Globals.API_URL}/upload")
@@ -52,13 +52,11 @@ object Network {
                 .getAsString(object : StringRequestListener {
                     override fun onResponse(url: String?) {
                         Log.d(Globals.TAG, "Response url: $url")
-                        callbackCalled = true
                         url?.let { responseUrl = url }
                         latch.countDown()
                     }
 
                     override fun onError(anError: ANError?) {
-                        callbackCalled = true
                         Globals.logError(anError)
                         latch.countDown()
                     }

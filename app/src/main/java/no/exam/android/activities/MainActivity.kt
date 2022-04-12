@@ -1,32 +1,17 @@
 package no.exam.android.activities
 
-import android.app.Activity
-import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.drawable.Drawable
-import android.net.Uri
 import android.os.Bundle
 import android.view.View
-import android.widget.Button
-import android.widget.ImageView
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
-import androidx.fragment.app.Fragment
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
-import kotlinx.coroutines.*
 import no.exam.android.R
 import no.exam.android.fragments.MainFragment
 import no.exam.android.fragments.ResultsFragment
-import no.exam.android.models.dtos.ImageDto
-import no.exam.android.utils.Network.downloadImageAsBitmap
-import no.exam.android.utils.Network.fetchImagesAsDtoList
-import no.exam.android.utils.Network.postImageToApi
-import java.io.File
 
 class MainActivity : AppCompatActivity() {
-
-
+    private val bitmaps = ArrayList<Bitmap>()
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -35,7 +20,7 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.main_frame, MainFragment())
+            .add(R.id.main_frame, MainFragment(bitmaps))
             .commit()
     }
 
@@ -44,19 +29,15 @@ class MainActivity : AppCompatActivity() {
             "1" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_results, MainFragment())
+                    .replace(R.id.fragment_main, MainFragment(bitmaps))
                     .commit()
             }
             "2" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, ResultsFragment())
+                    .replace(R.id.fragment_main, ResultsFragment(bitmaps))
                     .commit()
             }
         }
     }
-
-
-
-
 }

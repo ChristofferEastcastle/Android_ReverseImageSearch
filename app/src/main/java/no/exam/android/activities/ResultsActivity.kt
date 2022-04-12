@@ -44,15 +44,6 @@ class ResultsActivity : AppCompatActivity() {
                     await?.let { list.add(await) }
                 }
             }
-
-
-            withContext(Dispatchers.Main) {
-                recyclerView = findViewById(R.id.ResultsRecyclerView)
-                recyclerView.layoutManager = LinearLayoutManager(applicationContext)
-                recyclerView.setHasFixedSize(true)
-                recyclerView.adapter = ImageAdapter(list)
-            }
         }
-
     }
 }

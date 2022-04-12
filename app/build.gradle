@@ -38,6 +38,7 @@ android {
 
 
 dependencies {
+    implementation 'id.zelory:compressor:3.0.1'
     implementation group: 'com.fasterxml.jackson.module', name: 'jackson-module-kotlin', version: '2.13.2'
     implementation 'com.amitshekhar.android:android-networking:1.0.2'
     implementation 'com.edmodo:cropper:1.0.1'

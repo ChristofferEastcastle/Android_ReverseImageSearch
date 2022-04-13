@@ -30,7 +30,8 @@ class MainFragment(val bitmaps: ArrayList<Bitmap>) : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_main, container, false)
-        view.findViewById<Button>(R.id.AddPictureBtn).setOnClickListener { addImage(view.findViewById(R.id.image)) }
+        view.findViewById<Button>(R.id.AddPictureBtn)
+            .setOnClickListener { addImage(view.findViewById(R.id.image)) }
 
         view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
             onClickUpload()
@@ -41,6 +42,9 @@ class MainFragment(val bitmaps: ArrayList<Bitmap>) : Fragment() {
     private fun onClickUpload() {
         if (imageUri == null) return
         scope.launch(Dispatchers.IO) {
+            withContext(Dispatchers.Main) {
+                Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_LONG)
+            }
             val imageFile = createTempImageFile(imageUri!!) ?: return@launch
             val apiResponseUrl = Network.postImageToApi(imageFile) ?: return@launch
             val imageDtoList = Network.fetchImagesAsDtoList(apiResponseUrl)
@@ -56,7 +60,11 @@ class MainFragment(val bitmaps: ArrayList<Bitmap>) : Fragment() {
                 bitmaps.add(bitmap)
             }
             withContext(Dispatchers.Main) {
-                Toast.makeText(requireContext(), "Finished downloading. Go to results!", Toast.LENGTH_LONG).show()
+                Toast.makeText(
+                    requireContext(),
+                    "Finished downloading. Go to results!",
+                    Toast.LENGTH_LONG
+                ).show()
             }
         }
     }
@@ -78,14 +86,15 @@ class MainFragment(val bitmaps: ArrayList<Bitmap>) : Fragment() {
         resultLauncher.launch(intent)
     }
 
-    private val resultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
-        if (it.resultCode == Activity.RESULT_OK) {
-            val urlToString = it.data?.data.toString()
-            imageUri = Uri.parse(urlToString)
-            with(requireActivity().contentResolver.openInputStream(Uri.parse(urlToString))) {
+    private val resultLauncher =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) {
+            if (it.resultCode == Activity.RESULT_OK) {
+                val urlToString = it.data?.data.toString()
+                imageUri = Uri.parse(urlToString)
+                with(requireActivity().contentResolver.openInputStream(Uri.parse(urlToString))) {
 
-                imageView?.setImageDrawable(Drawable.createFromStream(this, urlToString))
+                    imageView?.setImageDrawable(Drawable.createFromStream(this, urlToString))
+                }
             }
         }
-    }
 }

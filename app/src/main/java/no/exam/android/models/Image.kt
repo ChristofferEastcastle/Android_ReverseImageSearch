@@ -1,3 +1,5 @@
 package no.exam.android.models
 
-data class Image(val image: Int)
+import android.graphics.Bitmap
+
+data class Image(val bitmap: Bitmap)

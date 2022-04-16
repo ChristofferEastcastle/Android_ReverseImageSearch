@@ -25,12 +25,10 @@ class ResultsFragment(private val bitmaps: ArrayList<Bitmap>) : Fragment() {
     ): View? {
         scope = MainScope()
         val view = inflater.inflate(R.layout.fragment_results, container, false)
-        scope.launch(Dispatchers.Main) {
-            recyclerView = view.findViewById(R.id.ResultsRecyclerView)
-            recyclerView.layoutManager = LinearLayoutManager(context)
-            recyclerView.setHasFixedSize(true)
-            recyclerView.adapter = ImageAdapter(bitmaps)
-        }
+        recyclerView = view.findViewById(R.id.ResultsRecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(context)
+        recyclerView.setHasFixedSize(true)
+        recyclerView.adapter = ImageAdapter(bitmaps)
         return view
     }
 }

@@ -7,7 +7,7 @@ import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
 import no.exam.android.R
-import no.exam.android.fragments.MainFragment
+import no.exam.android.fragments.UploadFragment
 import no.exam.android.fragments.ResultsFragment
 
 class MainActivity : AppCompatActivity() {
@@ -20,16 +20,16 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.main_frame, MainFragment(bitmaps))
+            .add(R.id.main_frame, UploadFragment(bitmaps))
             .commit()
     }
 
     fun switchFragments(view: View) {
-        when(view.tag) {
+        when (view.tag) {
             "1" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, MainFragment(bitmaps))
+                    .replace(R.id.fragment_main, UploadFragment(bitmaps))
                     .commit()
             }
             "2" -> {

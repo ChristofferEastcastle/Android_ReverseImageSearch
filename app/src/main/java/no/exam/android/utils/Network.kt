@@ -10,6 +10,7 @@ import com.androidnetworking.interfaces.JSONArrayRequestListener
 import com.androidnetworking.interfaces.StringRequestListener
 import kotlinx.coroutines.*
 import no.exam.android.Globals
+import no.exam.android.models.ImageBitmap
 import no.exam.android.models.dtos.ImageDto
 import no.exam.android.utils.JsonParser.parseJSONArrayToImageDto
 import org.json.JSONArray
@@ -20,8 +21,9 @@ object Network {
     suspend fun fetchImagesAsDtoList(url: String): ArrayList<ImageDto> {
         val latch = CountDownLatch(1)
         var imageDtoList = ArrayList<ImageDto>()
+
         withContext(Dispatchers.IO) {
-            AndroidNetworking.get("${Globals.API_URL}/bing?url=$url")
+            AndroidNetworking.get(url)
                 .build()
                 .getAsJSONArray(object : JSONArrayRequestListener {
                     override fun onResponse(response: JSONArray) {
@@ -89,5 +91,17 @@ object Network {
             latch.await()
         }
         return bitmap
+    }
+
+    suspend fun downloadAllAsBitmap(imageDtoList: ArrayList<ImageDto>): ArrayList<Deferred<Bitmap?>> {
+        val bitmaps = ArrayList<Deferred<Bitmap?>>()
+        coroutineScope {
+            for ((imageLink) in imageDtoList) {
+                val deferredBitmap = async { downloadImageAsBitmap(imageLink) }
+                deferredBitmap.invokeOnCompletion {  }
+                bitmaps.add(deferredBitmap)
+            }
+        }
+        return bitmaps
     }
 }

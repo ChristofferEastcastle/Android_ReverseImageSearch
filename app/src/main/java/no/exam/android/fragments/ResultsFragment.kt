@@ -1,5 +1,6 @@
 package no.exam.android.fragments
 
+import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
@@ -13,8 +14,12 @@ import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
 import no.exam.android.databinding.ActivityResultsBinding
 
-class ResultsFragment(private val bitmaps: ArrayList<Bitmap>) : Fragment() {
+class ResultsFragment(
+    private val deferredBitmaps: ArrayList<Deferred<Bitmap?>>
+) : Fragment() {
+    lateinit var uploadFragment: UploadFragment
     private lateinit var binding: ActivityResultsBinding
+    private lateinit var bitmaps: ArrayList<Bitmap>
     private lateinit var recyclerView: RecyclerView
     private lateinit var scope: CoroutineScope
 
@@ -24,11 +29,26 @@ class ResultsFragment(private val bitmaps: ArrayList<Bitmap>) : Fragment() {
         savedInstanceState: Bundle?
     ): View? {
         scope = MainScope()
+        bitmaps = ArrayList()
         val view = inflater.inflate(R.layout.fragment_results, container, false)
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(true)
         recyclerView.adapter = ImageAdapter(bitmaps)
+        for (deferred in deferredBitmaps) {
+            scope.launch(Dispatchers.Main) {
+                deferred.invokeOnCompletion { launch { waitAndUpdate() } }
+            }
+        }
         return view
+    }
+
+    @SuppressLint("NotifyDataSetChanged")
+    fun waitAndUpdate() {
+        recyclerView.adapter?.notifyDataSetChanged()
+    }
+
+    private fun updateRecyclerView(position: Int) {
+        recyclerView.adapter?.notifyItemChanged(position)
     }
 }

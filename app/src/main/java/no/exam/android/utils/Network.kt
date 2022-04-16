@@ -68,7 +68,7 @@ object Network {
         return responseUrl
     }
 
-    suspend fun downloadImageAsBitmap(imageLink: String?): Bitmap? {
+    private suspend fun downloadImageAsBitmap(imageLink: String): Bitmap? {
         var bitmap: Bitmap? = null
         val latch = CountDownLatch(1)
         withContext(Dispatchers.IO) {
@@ -78,8 +78,8 @@ object Network {
                     Log.i(Globals.TAG, "Downloaded: $bytesDownloaded | Total: $totalBytes")
                 }
                 .getAsBitmap(object : BitmapRequestListener {
-                    override fun onResponse(response: Bitmap?) {
-                        response?.let { bitmap = response }
+                    override fun onResponse(response: Bitmap) {
+                        bitmap = response
                         latch.countDown()
                     }
 

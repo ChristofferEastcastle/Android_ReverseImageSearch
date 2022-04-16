@@ -20,12 +20,13 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>) : RecyclerView.Adap
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val currentImage = imageList[position]
-        holder.image.setImageBitmap(currentImage)
+        for (image in imageList) {
+            holder.image.setImageBitmap(image)
+        }
     }
 
     override fun getItemCount(): Int {
-        return imageList.size
+        return 20
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

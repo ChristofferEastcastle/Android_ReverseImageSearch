@@ -5,18 +5,26 @@ import android.os.Bundle
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
+import com.androidnetworking.error.ANError
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
-import kotlinx.coroutines.Deferred
+import com.androidnetworking.interfaces.JSONArrayRequestListener
+import kotlinx.coroutines.*
+import no.exam.android.Globals
 import no.exam.android.R
-import no.exam.android.fragments.UploadFragment
 import no.exam.android.fragments.ResultsFragment
+import no.exam.android.fragments.UploadFragment
+import no.exam.android.utils.JsonParser
+import no.exam.android.utils.Network
+import org.json.JSONArray
+import java.util.concurrent.CountDownLatch
 
 class MainActivity : AppCompatActivity() {
-    private val bitmaps = ArrayList<Deferred<Bitmap?>>()
+    private var bitmaps: ArrayList<Deferred<Bitmap?>> = ArrayList()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+
         AndroidNetworking.initialize(applicationContext)
         AndroidNetworking.enableLogging(HttpLoggingInterceptor.Level.HEADERS)
 
@@ -24,6 +32,12 @@ class MainActivity : AppCompatActivity() {
             .beginTransaction()
             .add(R.id.main_frame, UploadFragment(bitmaps))
             .commit()
+
+        MainScope().launch(Dispatchers.IO) {
+            bitmaps =
+                Network.downloadAllAsBitmap(JsonParser.parseJSONArrayToImageDto(getDummyData()))
+        }
+
     }
 
     fun switchFragments(view: View) {
@@ -31,15 +45,37 @@ class MainActivity : AppCompatActivity() {
             "1" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, UploadFragment(bitmaps))
+                    .replace(R.id.main_frame, UploadFragment(bitmaps))
                     .commit()
             }
             "2" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, ResultsFragment(bitmaps))
+                    .replace(R.id.fragment_upload, ResultsFragment(bitmaps))
                     .commit()
             }
         }
+    }
+
+    private fun getDummyData(): JSONArray {
+        var jsonArray = JSONArray()
+        val latch = CountDownLatch(1)
+        MainScope().launch(Dispatchers.IO) {
+            AndroidNetworking.get("http://192.168.1.230:3000")
+                .build()
+                .getAsJSONArray(object : JSONArrayRequestListener {
+                    override fun onResponse(response: JSONArray) {
+                        jsonArray = response
+                        latch.countDown()
+                    }
+
+                    override fun onError(anError: ANError?) {
+                        Globals.logError(anError)
+                        latch.countDown()
+                    }
+                })
+        }
+        latch.await()
+        return jsonArray
     }
 }

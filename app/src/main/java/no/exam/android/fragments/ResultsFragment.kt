@@ -1,11 +1,12 @@
 package no.exam.android.fragments
 
-import android.annotation.SuppressLint
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
+import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,7 +17,7 @@ import no.exam.android.adapters.ImageAdapter
 class ResultsFragment(
     var deferredBitmaps: ArrayList<Deferred<Bitmap?>>
 ) : Fragment() {
-    private lateinit var bitmaps: ArrayList<Bitmap>
+    private val bitmaps: ArrayList<Bitmap> = ArrayList()
     private lateinit var recyclerView: RecyclerView
     private lateinit var scope: CoroutineScope
 
@@ -26,36 +27,43 @@ class ResultsFragment(
         savedInstanceState: Bundle?
     ): View? {
         scope = MainScope()
-        bitmaps = ArrayList()
+
         val view = inflater.inflate(R.layout.fragment_results, container, false)
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
         recyclerView.adapter = ImageAdapter(bitmaps)
 
-        scope.launch {
-            addInvokeOnCompletionToDeferredBitmaps(deferredBitmaps)
+        for (i in 0 until bitmaps.size) {
+            val findViewByPosition = (recyclerView.layoutManager as LinearLayoutManager)
+                .findViewByPosition(i)
+            with(findViewByPosition as ImageView) {
+                this.setOnClickListener {
+                    Toast.makeText(requireContext(), "Clicked: ${it.id}", Toast.LENGTH_SHORT)
+                        .show()
+                }
+            }
         }
+        addUpdateOnCompletion(deferredBitmaps)
         return view
     }
 
-    suspend fun addInvokeOnCompletionToDeferredBitmaps(
+    fun addUpdateOnCompletion(
         deferredBitmaps: ArrayList<Deferred<Bitmap?>>
     ) {
         for (deferred in deferredBitmaps) {
             deferred.invokeOnCompletion {
-                scope.launch { addAndUpdate(deferred) }
+                scope.launch(Dispatchers.IO) {
+                    val bitmap = deferred.await()
+                    bitmap?.let<Bitmap, Unit> {
+                        bitmaps += bitmap
+                        withContext(Dispatchers.Main) {
+                            recyclerView.adapter?.notifyItemInserted(bitmaps.size - 1)
+                        }
+                    }
+                }
             }
         }
     }
 
-    private suspend fun addAndUpdate(deferred: Deferred<Bitmap?>) {
-        coroutineScope {
-            launch(Dispatchers.Main) {
-                val bitmap = deferred.await()
-                bitmap?.let { bitmaps.add(bitmap) }
-                recyclerView.adapter?.notifyItemInserted(bitmaps.size - 1)
-            }
-        }
-    }
 }

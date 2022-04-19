@@ -98,7 +98,6 @@ object Network {
         coroutineScope {
             for ((imageLink) in imageDtoList) {
                 val deferredBitmap = async { downloadImageAsBitmap(imageLink) }
-                deferredBitmap.invokeOnCompletion {  }
                 bitmaps.add(deferredBitmap)
             }
         }

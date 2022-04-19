@@ -23,7 +23,7 @@ import no.exam.android.utils.Network
 import java.io.File
 
 class UploadFragment(
-    private val bitmaps: ArrayList<Deferred<Bitmap?>>
+    private val deferredBitmaps: ArrayList<Deferred<Bitmap?>>
 ) : Fragment() {
     var resultsFragment: ResultsFragment? = null
     private var imageUri: Uri? = null
@@ -35,7 +35,7 @@ class UploadFragment(
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-        val view = inflater.inflate(R.layout.fragment_main, container, false)
+        val view = inflater.inflate(R.layout.fragment_upload, container, false)
         view.findViewById<Button>(R.id.AddPictureBtn)
             .setOnClickListener { addImage(view.findViewById(R.id.image)) }
 
@@ -50,6 +50,7 @@ class UploadFragment(
             Toast.makeText(requireContext(), "No image added...", Toast.LENGTH_LONG).show()
             return
         }
+        deferredBitmaps.clear()
         scope.launch(IO) {
             withContext(Dispatchers.Main) {
                 Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_LONG).show()
@@ -63,7 +64,7 @@ class UploadFragment(
                     val imageDtoList =
                         Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
                     for (deferred in Network.downloadAllAsBitmap(imageDtoList)) {
-                        bitmaps.add(deferred)
+                        deferredBitmaps.add(deferred)
                     }
 
                     // Checking if user already has entered the results page.
@@ -71,7 +72,8 @@ class UploadFragment(
                     val fragments = activity?.supportFragmentManager?.fragments
                     val resultsFragment =
                         fragments?.firstOrNull { it is ResultsFragment } as ResultsFragment?
-                    resultsFragment?.addInvokeOnCompletionToDeferredBitmaps(bitmaps)
+                    resultsFragment?.addUpdateOnCompletion(deferredBitmaps)
+                    resultsFragment?.deferredBitmaps?.addAll(deferredBitmaps)
                 }
             }
         }

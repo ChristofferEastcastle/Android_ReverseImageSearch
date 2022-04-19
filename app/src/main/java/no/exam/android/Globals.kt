@@ -4,14 +4,15 @@ import android.util.Log
 import com.androidnetworking.error.ANError
 
 class Globals {
-    companion object{
+    companion object {
         const val API_URL = "http://api-edu.gtl.ai/api/v1/imagesearch"
+        const val TEST_API_URL =
+            "https://android-express-testserver.herokuapp.com/api/v1/imagesearch"
         const val TAG = "MY_TAG"
 
         fun logError(anError: ANError?) {
-            Log.e(Globals.TAG, anError?.cause.toString())
-            Log.e(Globals.TAG, anError?.errorBody.toString())
+            Log.e(TAG, anError?.cause.toString())
+            Log.e(TAG, anError?.errorBody.toString())
         }
     }
-
 }

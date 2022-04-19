@@ -12,13 +12,10 @@ import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
 import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
-import no.exam.android.databinding.ActivityResultsBinding
 
 class ResultsFragment(
-    private val deferredBitmaps: ArrayList<Deferred<Bitmap?>>
+    var deferredBitmaps: ArrayList<Deferred<Bitmap?>>
 ) : Fragment() {
-    lateinit var uploadFragment: UploadFragment
-    private lateinit var binding: ActivityResultsBinding
     private lateinit var bitmaps: ArrayList<Bitmap>
     private lateinit var recyclerView: RecyclerView
     private lateinit var scope: CoroutineScope
@@ -33,22 +30,32 @@ class ResultsFragment(
         val view = inflater.inflate(R.layout.fragment_results, container, false)
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
-        recyclerView.setHasFixedSize(true)
+        recyclerView.setHasFixedSize(false)
         recyclerView.adapter = ImageAdapter(bitmaps)
-        for (deferred in deferredBitmaps) {
-            scope.launch(Dispatchers.Main) {
-                deferred.invokeOnCompletion { launch { waitAndUpdate() } }
-            }
+
+        scope.launch {
+            addInvokeOnCompletionToDeferredBitmaps(deferredBitmaps)
         }
         return view
     }
 
-    @SuppressLint("NotifyDataSetChanged")
-    fun waitAndUpdate() {
-        recyclerView.adapter?.notifyDataSetChanged()
+    suspend fun addInvokeOnCompletionToDeferredBitmaps(
+        deferredBitmaps: ArrayList<Deferred<Bitmap?>>
+    ) {
+        for (deferred in deferredBitmaps) {
+            deferred.invokeOnCompletion {
+                scope.launch { addAndUpdate(deferred) }
+            }
+        }
     }
 
-    private fun updateRecyclerView(position: Int) {
-        recyclerView.adapter?.notifyItemChanged(position)
+    private suspend fun addAndUpdate(deferred: Deferred<Bitmap?>) {
+        coroutineScope {
+            launch(Dispatchers.Main) {
+                val bitmap = deferred.await()
+                bitmap?.let { bitmaps.add(bitmap) }
+                recyclerView.adapter?.notifyItemInserted(bitmaps.size - 1)
+            }
+        }
     }
 }

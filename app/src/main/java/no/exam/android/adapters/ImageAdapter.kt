@@ -1,12 +1,14 @@
 package no.exam.android.adapters
 
 import android.graphics.Bitmap
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.RecyclerView
 import com.google.android.material.imageview.ShapeableImageView
+import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.models.Image
 import no.exam.android.models.ImageBitmap
@@ -20,13 +22,12 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>) : RecyclerView.Adap
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        for (image in imageList) {
-            holder.image.setImageBitmap(image)
-        }
+        val currentImage = imageList[position]
+        holder.image.setImageBitmap(currentImage)
     }
 
     override fun getItemCount(): Int {
-        return 20
+        return imageList.size
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

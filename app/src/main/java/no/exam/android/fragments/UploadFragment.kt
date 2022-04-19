@@ -19,8 +19,6 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.R
-import no.exam.android.models.Image
-import no.exam.android.models.dtos.ImageDto
 import no.exam.android.utils.Network
 import java.io.File
 
@@ -62,23 +60,20 @@ class UploadFragment(
 
             for (endpoint in endpoints) {
                 launch(IO) {
-                    val imageDtoList = Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
+                    val imageDtoList =
+                        Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
                     for (deferred in Network.downloadAllAsBitmap(imageDtoList)) {
-                        deferred.invokeOnCompletion { resultsFragment?.waitAndUpdate() }
                         bitmaps.add(deferred)
                     }
+
+                    // Checking if user already has entered the results page.
+                    // If that is the case we want to set update view holder when finished downloading.
+                    val fragments = activity?.supportFragmentManager?.fragments
+                    val resultsFragment =
+                        fragments?.firstOrNull { it is ResultsFragment } as ResultsFragment?
+                    resultsFragment?.addInvokeOnCompletionToDeferredBitmaps(bitmaps)
                 }
             }
-
-            /*
-            withContext(Dispatchers.Main) {
-                Toast.makeText(
-                    context,
-                    "Finished downloading. Go to results!",
-                    Toast.LENGTH_LONG
-                ).show()
-            }
-            */
         }
     }
 

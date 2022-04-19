@@ -13,18 +13,12 @@ import no.exam.android.fragments.ResultsFragment
 
 class MainActivity : AppCompatActivity() {
     private val bitmaps = ArrayList<Deferred<Bitmap?>>()
-    private lateinit var uploadFragment: UploadFragment
-    private lateinit var resultsFragment: ResultsFragment
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         AndroidNetworking.initialize(applicationContext)
         AndroidNetworking.enableLogging(HttpLoggingInterceptor.Level.HEADERS)
-
-        resultsFragment = ResultsFragment(bitmaps)
-        uploadFragment = UploadFragment(bitmaps)
-        resultsFragment.uploadFragment = uploadFragment
-        uploadFragment.resultsFragment = resultsFragment
 
         supportFragmentManager
             .beginTransaction()
@@ -37,13 +31,13 @@ class MainActivity : AppCompatActivity() {
             "1" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, uploadFragment)
+                    .replace(R.id.fragment_main, UploadFragment(bitmaps))
                     .commit()
             }
             "2" -> {
                 supportFragmentManager
                     .beginTransaction()
-                    .replace(R.id.fragment_main, resultsFragment)
+                    .replace(R.id.fragment_main, ResultsFragment(bitmaps))
                     .commit()
             }
         }

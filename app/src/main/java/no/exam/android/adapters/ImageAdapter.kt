@@ -2,15 +2,20 @@ package no.exam.android.adapters
 
 import android.content.Intent
 import android.graphics.Bitmap
+import android.os.Bundle
+import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.view.drawToBitmap
 import androidx.recyclerview.widget.RecyclerView
 import no.exam.android.R
 import no.exam.android.activities.SavePopupActivity
 import no.exam.android.fragments.ResultsFragment
+import no.exam.android.models.ImageBitmap
+import java.io.ByteArrayOutputStream
 
 class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: ResultsFragment) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
@@ -42,6 +47,10 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
             Toast.LENGTH_SHORT
         ).show()
         val intent = Intent(context.requireContext(), SavePopupActivity::class.java)
+        val bitmap = imageList[position]
+        val byteArrayOutputStream = ByteArrayOutputStream()
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
+        intent.putExtra("IMAGE", byteArrayOutputStream.toByteArray())
         context.startActivity(intent)
     }
 

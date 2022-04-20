@@ -4,8 +4,11 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.os.Parcel
 import android.os.Parcelable
+import androidx.versionedparcelable.VersionedParcelize
+import kotlinx.android.parcel.Parcelize
 import java.io.ByteArrayOutputStream
 
-data class ImageBitmap(val bitmap: Bitmap) {
+@Parcelize
+data class ImageBitmap(val bitmap: Bitmap) : Parcelable {
 
 }

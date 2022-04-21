@@ -6,11 +6,11 @@
         android:id="@+id/fragment_results"
         android:background="@color/white">
 
+
     <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/ResultsRecyclerView"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintBottom_toBottomOf="parent"

@@ -2,6 +2,7 @@ package no.exam.android
 
 import android.util.Log
 import com.androidnetworking.error.ANError
+import android.database.sqlite.SQLiteDatabase
 
 class Globals {
     companion object {
@@ -14,5 +15,9 @@ class Globals {
             Log.e(TAG, anError?.cause.toString())
             Log.e(TAG, anError?.errorBody.toString())
         }
+    }
+
+    fun openOrCreateDatabase() {
+        val db = SQLiteDatabase.openDatabase("jdbc://image_db:3000", null, 0)
     }
 }

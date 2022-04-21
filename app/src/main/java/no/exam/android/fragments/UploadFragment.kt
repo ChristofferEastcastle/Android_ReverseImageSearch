@@ -1,6 +1,7 @@
 package no.exam.android.fragments
 
 import android.app.Activity
+import android.content.ContentValues
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -15,10 +16,15 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import id.zelory.compressor.Compressor
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.R
+import no.exam.android.db.DbHelper
 import no.exam.android.utils.Network
 import java.io.File
 
@@ -52,7 +58,7 @@ class UploadFragment(
         }
         deferredBitmaps.clear()
         scope.launch(IO) {
-            withContext(Dispatchers.Main) {
+            withContext(Main) {
                 Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_LONG).show()
             }
             val imageFile = createTempImageFile(imageUri!!) ?: return@launch
@@ -77,6 +83,13 @@ class UploadFragment(
                 }
             }
         }
+    }
+
+    private fun saveCurrentToDb(imageFile: File) {
+        val dbHelper = DbHelper(requireContext())
+        dbHelper.writableDatabase.insert("current_image", null, ContentValues().apply {
+            put("image", imageFile.readBytes())
+        })
     }
 
     private fun createTempImageFile(imageUri: Uri): File? {

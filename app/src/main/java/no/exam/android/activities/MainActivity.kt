@@ -12,6 +12,7 @@ import kotlinx.coroutines.*
 import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.fragments.ResultsFragment
+import no.exam.android.fragments.SavedFragment
 import no.exam.android.fragments.UploadFragment
 import no.exam.android.utils.JsonParser
 import no.exam.android.utils.Network
@@ -41,20 +42,22 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun switchFragments(view: View) {
+        val transaction = supportFragmentManager.beginTransaction()
         when (view.tag) {
             "1" -> {
-                supportFragmentManager
-                    .beginTransaction()
+                transaction
                     .replace(R.id.main_frame, UploadFragment(bitmaps))
-                    .commit()
             }
             "2" -> {
-                supportFragmentManager
-                    .beginTransaction()
-                    .replace(R.id.fragment_upload, ResultsFragment(bitmaps))
-                    .commit()
+                transaction
+                    .replace(R.id.main_frame, ResultsFragment(bitmaps))
+            }
+            "3" -> {
+                transaction
+                    .replace(R.id.main_frame, SavedFragment())
             }
         }
+        transaction.commit()
     }
 
     private fun getDummyData(): JSONArray {

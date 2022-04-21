@@ -1,5 +1,6 @@
 package no.exam.android.adapters
 
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.view.LayoutInflater
@@ -14,7 +15,7 @@ import no.exam.android.activities.SavePopupActivity
 import no.exam.android.fragments.ResultsFragment
 import java.io.ByteArrayOutputStream
 
-class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: FragmentActivity) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
+class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: Context) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     var viewGroup: ViewGroup? = null
 

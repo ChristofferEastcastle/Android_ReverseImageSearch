@@ -2,7 +2,6 @@ package no.exam.android.utils
 
 import android.graphics.Bitmap
 import android.util.Log
-import android.widget.Toast
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.BitmapRequestListener
@@ -10,7 +9,6 @@ import com.androidnetworking.interfaces.JSONArrayRequestListener
 import com.androidnetworking.interfaces.StringRequestListener
 import kotlinx.coroutines.*
 import no.exam.android.Globals
-import no.exam.android.models.ImageBitmap
 import no.exam.android.models.dtos.ImageDto
 import no.exam.android.utils.JsonParser.parseJSONArrayToImageDto
 import org.json.JSONArray

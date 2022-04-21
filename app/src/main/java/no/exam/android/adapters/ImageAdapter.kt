@@ -2,22 +2,19 @@ package no.exam.android.adapters
 
 import android.content.Intent
 import android.graphics.Bitmap
-import android.os.Bundle
-import android.os.Parcelable
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.core.view.drawToBitmap
+import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import no.exam.android.R
 import no.exam.android.activities.SavePopupActivity
 import no.exam.android.fragments.ResultsFragment
-import no.exam.android.models.ImageBitmap
 import java.io.ByteArrayOutputStream
 
-class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: ResultsFragment) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
+class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: FragmentActivity) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     var viewGroup: ViewGroup? = null
 
@@ -46,7 +43,7 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
             "Position: $position ID: ${holder.itemId}",
             Toast.LENGTH_SHORT
         ).show()
-        val intent = Intent(context.requireContext(), SavePopupActivity::class.java)
+        val intent = Intent(context, SavePopupActivity::class.java)
         val bitmap = imageList[position]
         val byteArrayOutputStream = ByteArrayOutputStream()
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)

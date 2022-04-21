@@ -63,6 +63,7 @@ class UploadFragment(
                 launch(IO) {
                     val imageDtoList =
                         Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
+
                     for (deferred in Network.downloadAllAsBitmap(imageDtoList)) {
                         deferredBitmaps.add(deferred)
                     }
@@ -73,7 +74,6 @@ class UploadFragment(
                     val resultsFragment =
                         fragments?.firstOrNull { it is ResultsFragment } as ResultsFragment?
                     resultsFragment?.addUpdateOnCompletion(deferredBitmaps)
-                    resultsFragment?.deferredBitmaps?.addAll(deferredBitmaps)
                 }
             }
         }

@@ -5,12 +5,11 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.ImageView
-import android.widget.Toast
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
 
@@ -32,20 +31,10 @@ class ResultsFragment(
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
-        recyclerView.adapter = ImageAdapter(bitmaps, this)
+        recyclerView.adapter = ImageAdapter(bitmaps, requireActivity())
 
-        for (i in 0 until bitmaps.size) {
-            val findViewByPosition = (recyclerView.layoutManager as LinearLayoutManager)
-                .findViewByPosition(i)
-            with(findViewByPosition as ImageView) {
-                this.setOnClickListener {
-                    Toast.makeText(requireContext(), "Clicked: ${it.id}", Toast.LENGTH_SHORT)
-                        .show()
-                }
-            }
-        }
-        //val intent = Intent(context)
         addUpdateOnCompletion(deferredBitmaps)
+
         return view
     }
 
@@ -56,9 +45,11 @@ class ResultsFragment(
             deferred.invokeOnCompletion {
                 scope.launch(Dispatchers.IO) {
                     val bitmap = deferred.await()
-                    bitmap?.let<Bitmap, Unit> {
+                    bitmap?.let {
+                        // If bitmap is not null we add it to the list of bitmaps then notify recyclerview of insertion.
+                        if (bitmaps.contains(bitmap)) return@launch
                         bitmaps += bitmap
-                        withContext(Dispatchers.Main) {
+                        withContext(Main) {
                             recyclerView.adapter?.notifyItemInserted(bitmaps.size - 1)
                         }
                     }

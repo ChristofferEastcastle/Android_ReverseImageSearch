@@ -2,6 +2,7 @@ package no.exam.android.fragments
 
 import android.app.Activity
 import android.content.ContentValues
+import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -15,18 +16,17 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
+import com.androidnetworking.AndroidNetworking.put
 import id.zelory.compressor.Compressor
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.R
 import no.exam.android.db.DbHelper
+import no.exam.android.utils.ImageUtil
 import no.exam.android.utils.Network
-import java.io.File
+import kotlin.concurrent.thread
 
 class UploadFragment(
     private val deferredBitmaps: ArrayList<Deferred<Bitmap?>>
@@ -57,16 +57,21 @@ class UploadFragment(
             return
         }
         deferredBitmaps.clear()
-        scope.launch(IO) {
+        val imageUtil = ImageUtil(requireContext())
+        val imageBytes = imageUtil.getBytes(imageUri!!)
+        val upload = scope.async(IO) {
             withContext(Main) {
                 Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_LONG).show()
             }
-            val imageFile = createTempImageFile(imageUri!!) ?: return@launch
+            val imageFile = imageUtil.createTempImageFile(imageBytes)
             val compressed = Compressor.compress(requireContext(), imageFile)
-            val apiResponseUrl = Network.postImageToApi(compressed) ?: return@launch
+            val apiResponseUrl = Network.postImageToApi(compressed) ?: return@async
+            scope.launch(Dispatchers.Default) {
+                saveCurrentToDb(compressed.readBytes(), requireActivity().applicationContext)
+            }
 
             for (endpoint in endpoints) {
-                launch(IO) {
+                launch {
                     val imageDtoList =
                         Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
 
@@ -85,21 +90,24 @@ class UploadFragment(
         }
     }
 
-    private fun saveCurrentToDb(imageFile: File) {
-        val dbHelper = DbHelper(requireContext())
-        dbHelper.writableDatabase.insert("current_image", null, ContentValues().apply {
-            put("image", imageFile.readBytes())
-        })
-    }
-
-    private fun createTempImageFile(imageUri: Uri): File? {
-        val file = File.createTempFile("tmp", ".jpeg")
-
-        with(requireActivity().contentResolver.openInputStream(imageUri)) {
-            if (this == null) return null
-            file.writeBytes(this.readBytes())
+    private suspend fun saveCurrentToDb(imageBytes: ByteArray, context: Context) = withContext(IO) {
+        // TODO: Fix this ugly method
+        val dbHelper = DbHelper(context)
+        val rawQuery = dbHelper.readableDatabase.rawQuery("select * from current_image", null)
+        if (rawQuery.moveToNext()) {
+            dbHelper.writableDatabase.update("current_image", ContentValues().apply {
+                put("image", imageBytes)
+            }, "id = ?", arrayOf("0"))
+        } else {
+            dbHelper.writableDatabase.insert(
+                "current_image", null,
+                ContentValues().apply
+                {
+                    put("id", "0")
+                    put("image", imageBytes)
+                },
+            )
         }
-        return file
     }
 
     private fun addImage(view: ImageView) {

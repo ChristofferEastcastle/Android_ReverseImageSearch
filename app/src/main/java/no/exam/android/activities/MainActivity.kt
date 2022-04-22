@@ -31,12 +31,18 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .add(R.id.main_frame, UploadFragment(bitmaps))
+            .replace(R.id.fragment_upload, UploadFragment(bitmaps))
             .commit()
 
+
         MainScope().launch(Dispatchers.IO) {
-            bitmaps =
-                Network.downloadAllAsBitmap(JsonParser.parseJSONArrayToImageDto(getDummyData()))
+            bitmaps.addAll(
+                Network.downloadAllAsBitmap(
+                    JsonParser.parseJSONArrayToImageDto(
+                        getDummyData()
+                    )
+                )
+            )
         }
 
     }
@@ -46,15 +52,15 @@ class MainActivity : AppCompatActivity() {
         when (view.tag) {
             "1" -> {
                 transaction
-                    .replace(R.id.main_frame, UploadFragment(bitmaps))
+                    .replace(R.id.fragment_upload, UploadFragment(bitmaps))
             }
             "2" -> {
                 transaction
-                    .replace(R.id.main_frame, ResultsFragment(bitmaps))
+                    .replace(R.id.fragment_upload, ResultsFragment(bitmaps))
             }
             "3" -> {
                 transaction
-                    .replace(R.id.main_frame, SavedFragment())
+                    .replace(R.id.fragment_upload, SavedFragment())
             }
         }
         transaction.commit()

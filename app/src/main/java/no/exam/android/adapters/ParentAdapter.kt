@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import androidx.recyclerview.widget.LinearLayoutManager
+import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView
 import no.exam.android.R
 import no.exam.android.models.ParentItem
@@ -28,9 +29,9 @@ class ParentAdapter(
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val parentItem = parentList[position]
-        holder.original.setImageBitmap(parentItem.original.bitmap)
+        holder.original.setImageBitmap(parentItem.original)
         val images = holder.images
-        images.layoutManager = LinearLayoutManager(context)
+        images.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
         images.setHasFixedSize(false)
         images.adapter = ImageAdapter(parentItem.images, context)
     }

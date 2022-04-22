@@ -9,7 +9,7 @@ class DbHelper(context: Context) :
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("create table originals (id integer primary key autoincrement, image blob)")
         db.execSQL("create table saved_images (id integer primary key autoincrement, name text, image blob, original id, foreign key(original) references originals(id))")
-        db.execSQL("create table current_image (image blob)")
+        db.execSQL("create table current_image (id integer primary key check (id = 0), image blob)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -21,6 +21,6 @@ class DbHelper(context: Context) :
 
     companion object {
         const val DATABASE_NAME = "imageDatabase.db"
-        const val DATABASE_VERSION = 6
+        const val DATABASE_VERSION = 8
     }
 }

@@ -4,6 +4,7 @@ import no.exam.android.entities.ImageEntity
 import no.exam.android.models.Image
 import no.exam.android.models.ParentItem
 
+
 interface ImageRepo {
     suspend fun insertImageToSaved(image: Image)
 

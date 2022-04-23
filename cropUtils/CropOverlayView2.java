@@ -3,7 +3,7 @@
 // (powered by FernFlower decompiler)
 //
 
-package no.exam.android.utils;
+package no.exam.android.cropUtils;
 
 import android.content.Context;
 import android.graphics.Canvas;

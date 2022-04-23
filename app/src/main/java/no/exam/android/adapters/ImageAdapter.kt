@@ -3,25 +3,29 @@ package no.exam.android.adapters
 import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
-import androidx.fragment.app.FragmentActivity
 import androidx.recyclerview.widget.RecyclerView
 import no.exam.android.R
 import no.exam.android.activities.SavePopupActivity
+import no.exam.android.entities.ImageEntity
 import no.exam.android.fragments.ResultsFragment
 import java.io.ByteArrayOutputStream
 
-class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: Context) : RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
+class ImageAdapter( val imageList: List<ImageEntity>, private val context: Context) :
+    RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     var viewGroup: ViewGroup? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
-        val itemView = LayoutInflater.from(parent.context).inflate(R.layout.list_item,
-        parent, false)
+        val itemView = LayoutInflater.from(parent.context).inflate(
+            R.layout.list_item,
+            parent, false
+        )
         viewGroup = parent
         return ViewHolder(itemView)
     }
@@ -29,7 +33,8 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentImage = imageList[position]
         val image = holder.image
-        image.setImageBitmap(currentImage)
+        val bitmap = BitmapFactory.decodeByteArray(currentImage.bytes, 0, 0)
+        image.setImageBitmap(bitmap)
         image.setOnClickListener {
             onClickImage(position, holder)
         }
@@ -45,10 +50,8 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
             Toast.LENGTH_SHORT
         ).show()
         val intent = Intent(context, SavePopupActivity::class.java)
-        val bitmap = imageList[position]
-        val byteArrayOutputStream = ByteArrayOutputStream()
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream)
-        intent.putExtra("IMAGE", byteArrayOutputStream.toByteArray())
+        val imageEntity = imageList[position]
+        intent.putExtra("IMAGE", imageEntity.bytes)
         context.startActivity(intent)
     }
 

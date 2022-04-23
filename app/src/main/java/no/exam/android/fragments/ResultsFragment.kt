@@ -33,6 +33,7 @@ class ResultsFragment(
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
+
         recyclerView.adapter = ImageAdapter(bitmaps, requireActivity())
 
         addUpdateOnCompletion(deferredBitmaps)

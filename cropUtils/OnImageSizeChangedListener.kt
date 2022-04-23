@@ -1,4 +1,4 @@
-package no.exam.android.utils
+package no.exam.android.cropUtils
 
 import android.graphics.Rect
 

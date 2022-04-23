@@ -1,8 +1,6 @@
 package no.exam.android.fragments
 
 import android.app.Activity
-import android.content.ContentValues
-import android.content.Context
 import android.content.Intent
 import android.graphics.Bitmap
 import android.graphics.drawable.Drawable
@@ -16,25 +14,28 @@ import android.widget.ImageView
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
-import com.androidnetworking.AndroidNetworking.put
+import dagger.hilt.android.AndroidEntryPoint
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.R
-import no.exam.android.db.DbHelper
+import no.exam.android.models.Image
+import no.exam.android.repo.ImageRepo
 import no.exam.android.utils.ImageUtil
 import no.exam.android.utils.Network
-import kotlin.concurrent.thread
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class UploadFragment(
     private val deferredBitmaps: ArrayList<Deferred<Bitmap?>>
 ) : Fragment() {
-    var resultsFragment: ResultsFragment? = null
+    @Inject lateinit var database: ImageRepo
+
     private var imageUri: Uri? = null
     private var imageView: ImageView? = null
-    private val scope = MainScope()
+    private lateinit var scope: CoroutineScope
     private val endpoints = listOf("google", "bing", "tineye")
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -42,9 +43,10 @@ class UploadFragment(
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_upload, container, false)
+        scope = MainScope()
+
         view.findViewById<Button>(R.id.AddPictureBtn)
             .setOnClickListener { addImage(view.findViewById(R.id.image)) }
-
         view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
             onClickUpload()
         }
@@ -59,15 +61,15 @@ class UploadFragment(
         deferredBitmaps.clear()
         val imageUtil = ImageUtil(requireContext())
         val imageBytes = imageUtil.getBytes(imageUri!!)
-        val upload = scope.async(IO) {
+        scope.launch(IO) {
             withContext(Main) {
                 Toast.makeText(requireContext(), "Uploading...", Toast.LENGTH_LONG).show()
             }
             val imageFile = imageUtil.createTempImageFile(imageBytes)
             val compressed = Compressor.compress(requireContext(), imageFile)
-            val apiResponseUrl = Network.postImageToApi(compressed) ?: return@async
-            scope.launch(Dispatchers.Default) {
-                saveCurrentToDb(compressed.readBytes(), requireActivity().applicationContext)
+            val apiResponseUrl = Network.postImageToApi(compressed) ?: return@launch
+            scope.launch(IO) {
+                database.saveCurrent(Image(imageBytes))
             }
 
             for (endpoint in endpoints) {
@@ -87,26 +89,6 @@ class UploadFragment(
                     resultsFragment?.addUpdateOnCompletion(deferredBitmaps)
                 }
             }
-        }
-    }
-
-    private suspend fun saveCurrentToDb(imageBytes: ByteArray, context: Context) = withContext(IO) {
-        // TODO: Fix this ugly method
-        val dbHelper = DbHelper(context)
-        val rawQuery = dbHelper.readableDatabase.rawQuery("select * from current_image", null)
-        if (rawQuery.moveToNext()) {
-            dbHelper.writableDatabase.update("current_image", ContentValues().apply {
-                put("image", imageBytes)
-            }, "id = ?", arrayOf("0"))
-        } else {
-            dbHelper.writableDatabase.insert(
-                "current_image", null,
-                ContentValues().apply
-                {
-                    put("id", "0")
-                    put("image", imageBytes)
-                },
-            )
         }
     }
 

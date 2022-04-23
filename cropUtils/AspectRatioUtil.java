@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License. 
  */
 
-package no.exam.android.utils;
+package no.exam.android.cropUtils;
 
 import android.graphics.RectF;
 

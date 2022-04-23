@@ -8,6 +8,7 @@ import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
 import com.androidnetworking.interfaces.JSONArrayRequestListener
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import no.exam.android.Globals
 import no.exam.android.R
@@ -19,6 +20,7 @@ import no.exam.android.utils.Network
 import org.json.JSONArray
 import java.util.concurrent.CountDownLatch
 
+@AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
     private var bitmaps: ArrayList<Deferred<Bitmap?>> = ArrayList()
 

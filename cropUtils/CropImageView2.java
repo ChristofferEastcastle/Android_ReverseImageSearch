@@ -11,7 +11,7 @@
  * governing permissions and limitations under the License.
  */
 
-package no.exam.android.utils;
+package no.exam.android.cropUtils;
 
 import android.content.Context;
 import android.content.res.Resources;
@@ -27,7 +27,6 @@ import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
-import android.widget.ImageView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;

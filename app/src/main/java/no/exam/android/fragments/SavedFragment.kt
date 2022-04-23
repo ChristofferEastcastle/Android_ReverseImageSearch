@@ -35,7 +35,7 @@ class SavedFragment : Fragment() {
         val view = inflater.inflate(R.layout.fragment_saved, container, false)
 
         scope.launch(IO) {
-            val items = database.findAll(SAVED_IMAGES)
+            val items = database.findAllSaved()
 
             withContext(Main) {
                 val recyclerView = view.findViewById<RecyclerView>(R.id.RecyclerView)

@@ -3,31 +3,28 @@ package no.exam.android.repo
 import android.annotation.SuppressLint
 import android.content.ContentValues
 import android.content.Context
-import android.database.Cursor
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
+import android.graphics.Bitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import no.exam.android.entities.ImageEntity
-import no.exam.android.fragments.ResultsFragment
 import no.exam.android.models.Image
+import no.exam.android.models.ParentItem
 import no.exam.android.repo.ImageRepo.Table
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
-import java.util.function.Predicate
+import no.exam.android.utils.ImageUtil
 import javax.inject.Inject
 
 class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : ImageRepo,
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     @SuppressLint("Recycle")
-    override suspend fun insertImageToSaved(image: Image): Unit = withContext(Dispatchers.IO) {
-
+    override suspend fun insertImageToSaved(image: Image) {
         val originalId = findOriginalIdBasedOnCurrent()
+
         if (originalId != -1) {
             writableDatabase.insert("saved_images", null, ContentValues().apply {
                 put("image", image.bytes)
-                put("name", "original_existed")
                 put("original", originalId)
             })
         } else {
@@ -36,7 +33,6 @@ class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : 
             val lastIndex = readableDatabase.rawQuery("select last_insert_rowid()", null)
             lastIndex.moveToNext()
             writableDatabase.insert("saved_images", null, ContentValues().apply {
-                put("name", "image_name")
                 put("image", image.bytes)
                 put("original", lastIndex.getInt(0))
             })
@@ -55,22 +51,27 @@ class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : 
     }
 
     override suspend fun saveCurrent(image: Image) {
-        // TODO: Fix this ugly method
-        val rawQuery = readableDatabase.rawQuery("select * from current_image", null)
-        if (rawQuery.moveToNext()) {
-            writableDatabase.update("current_image", ContentValues().apply {
-                put("image", image.bytes)
-            }, "id = ?", arrayOf("0"))
-        } else {
-            writableDatabase.insert(
-                "current_image", null,
-                ContentValues().apply
-                {
-                    put("id", "0")
-                    put("image", image.bytes)
-                },
-            )
+        writableDatabase.execSQL("update current_image set image = null where id = 0")
+        writableDatabase.update("current_image", ContentValues().apply {
+            put("image", image.bytes)
+        }, "id = ?", arrayOf("0"))
+    }
+
+    override suspend fun findAllSaved(): ArrayList<ParentItem> {
+        val cursor = readableDatabase.rawQuery(
+            "select * from originals", null
+        )
+        val parentItems = arrayListOf<ParentItem>()
+        while (cursor.moveToNext()) {
+            val bitmap = ImageUtil.bytesToBitmap(cursor.getBlob(1))
+
+            val saved = findSavedByOriginalId(SAVED_IMAGES, cursor.getInt(0))
+
+            val savedList = arrayListOf<Bitmap>()
+            savedList.addAll(saved.map { ImageUtil.bytesToBitmap(it.bytes) })
+            parentItems += ParentItem(bitmap, savedList)
         }
+        return parentItems
     }
 
     override suspend fun findAll(table: Table): List<ImageEntity> {
@@ -79,43 +80,44 @@ class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : 
         )
         val list = mutableListOf<ImageEntity>()
         while (cursor.moveToNext()) {
-            list += mapCursorToEntity(cursor, table)
+            list += run {
+                val id = cursor.getInt(0)
+                val blob = cursor.getBlob(1)
+                var originals: List<ImageEntity>? = null
+                if (table == SAVED_IMAGES) {
+                    val originalId = cursor.getInt(2)
+                    originals = findSavedByOriginalId(SAVED_IMAGES, originalId)
+                }
+                ImageEntity(id, blob, originals)
+            }
         }
         return list
     }
 
-    private suspend fun mapCursorToEntity(
-        cursor: Cursor,
-        table: Table
-    ): ImageEntity {
-        val id = cursor.getInt(0)
-        val blob = cursor.getBlob(1)
-        var originals: List<ImageEntity>? = null
-        if (table == SAVED_IMAGES) {
-            val originalId = cursor.getInt(2)
-            originals = findSavedByOriginalId(SAVED_IMAGES, originalId)
-        }
-        return ImageEntity(id, blob, originals)
-    }
-
     override suspend fun findSavedByOriginalId(table: Table, originalId: Int): List<ImageEntity> {
         val cursor = readableDatabase.rawQuery(
-            "select * from ${table.name.lowercase()}" +
+            "select * from saved_images " +
                     "where original = ?", arrayOf(originalId.toString())
         )
         val list = mutableListOf<ImageEntity>()
         while (cursor.moveToNext()) {
-            list += mapCursorToEntity(cursor, table)
+            list += run {
+                val id = cursor.getInt(0)
+                val blob = cursor.getBlob(1)
+                ImageEntity(id, blob)
+            }
         }
         return list
     }
 
     override fun onCreate(db: SQLiteDatabase) {
         db.execSQL("create table originals (id integer primary key autoincrement, image blob)")
-        db.execSQL("create table saved_images (id integer primary key autoincrement, image blob, original id," +
+        db.execSQL(
+            "create table saved_images (id integer primary key autoincrement, image blob, original id," +
                     " foreign key(original) references originals(id))"
         )
         db.execSQL("create table current_image (id integer primary key check (id = 0), image blob)")
+        db.execSQL("insert into current_image values(0, null)")
     }
 
     override fun onUpgrade(db: SQLiteDatabase, oldVersion: Int, newVersion: Int) {
@@ -127,6 +129,6 @@ class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : 
 
     companion object {
         const val DATABASE_NAME = "imageDatabase.db"
-        const val DATABASE_VERSION = 9
+        const val DATABASE_VERSION = 13
     }
 }

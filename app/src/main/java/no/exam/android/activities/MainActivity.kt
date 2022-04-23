@@ -33,9 +33,8 @@ class MainActivity : AppCompatActivity() {
 
         supportFragmentManager
             .beginTransaction()
-            .replace(R.id.fragment_upload, UploadFragment(bitmaps))
+            .replace(R.id.fragment_holder, UploadFragment(bitmaps))
             .commit()
-
 
         MainScope().launch(Dispatchers.IO) {
             bitmaps.addAll(
@@ -54,15 +53,15 @@ class MainActivity : AppCompatActivity() {
         when (view.tag) {
             "1" -> {
                 transaction
-                    .replace(R.id.fragment_upload, UploadFragment(bitmaps))
+                    .replace(R.id.fragment_holder, UploadFragment(bitmaps))
             }
             "2" -> {
                 transaction
-                    .replace(R.id.fragment_upload, ResultsFragment(bitmaps))
+                    .replace(R.id.fragment_holder, ResultsFragment(bitmaps))
             }
             "3" -> {
                 transaction
-                    .replace(R.id.fragment_upload, SavedFragment())
+                    .replace(R.id.fragment_holder, SavedFragment())
             }
         }
         transaction.commit()

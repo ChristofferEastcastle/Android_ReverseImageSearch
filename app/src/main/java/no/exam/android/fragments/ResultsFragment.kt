@@ -14,6 +14,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
+import no.exam.android.models.Image
 
 class ResultsFragment(
     var deferredBitmaps: ArrayList<Deferred<Bitmap?>>
@@ -33,6 +34,7 @@ class ResultsFragment(
         recyclerView = view.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
+
 
         recyclerView.adapter = ImageAdapter(bitmaps, requireActivity())
 

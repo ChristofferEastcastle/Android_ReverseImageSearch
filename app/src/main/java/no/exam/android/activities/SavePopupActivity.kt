@@ -5,15 +5,18 @@ import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class SavePopupActivity : AppCompatActivity() {
-    lateinit var database: ImageRepo
+    @Inject lateinit var database: ImageRepo
     private lateinit var scope: CoroutineScope
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -21,6 +24,7 @@ class SavePopupActivity : AppCompatActivity() {
         scope = MainScope()
 
         val bytes = intent.extras?.get("IMAGE")
+
         if (bytes !is ByteArray) return
 
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
@@ -28,7 +32,9 @@ class SavePopupActivity : AppCompatActivity() {
 
 
         findViewById<Button>(R.id.SaveImage).setOnClickListener {
-            scope.launch { database.saveCurrent(Image(bytes)) }
+            scope.launch {
+                database.insertImageToSaved(Image(bytes))
+            }
         }
     }
 

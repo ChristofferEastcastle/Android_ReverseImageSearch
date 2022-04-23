@@ -9,6 +9,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.Toast
+import androidx.core.content.ContextCompat.startActivity
 import androidx.recyclerview.widget.RecyclerView
 import no.exam.android.R
 import no.exam.android.activities.SavePopupActivity
@@ -16,7 +17,7 @@ import no.exam.android.entities.ImageEntity
 import no.exam.android.fragments.ResultsFragment
 import java.io.ByteArrayOutputStream
 
-class ImageAdapter( val imageList: List<ImageEntity>, private val context: Context) :
+class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context: Context) :
     RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     var viewGroup: ViewGroup? = null
@@ -33,8 +34,7 @@ class ImageAdapter( val imageList: List<ImageEntity>, private val context: Conte
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
         val currentImage = imageList[position]
         val image = holder.image
-        val bitmap = BitmapFactory.decodeByteArray(currentImage.bytes, 0, 0)
-        image.setImageBitmap(bitmap)
+        image.setImageBitmap(currentImage)
         image.setOnClickListener {
             onClickImage(position, holder)
         }
@@ -50,9 +50,11 @@ class ImageAdapter( val imageList: List<ImageEntity>, private val context: Conte
             Toast.LENGTH_SHORT
         ).show()
         val intent = Intent(context, SavePopupActivity::class.java)
-        val imageEntity = imageList[position]
-        intent.putExtra("IMAGE", imageEntity.bytes)
-        context.startActivity(intent)
+        val image = imageList[position]
+        val stream = ByteArrayOutputStream()
+        image.compress(Bitmap.CompressFormat.JPEG, 100, stream)
+        intent.putExtra("IMAGE", stream.toByteArray())
+        startActivity(context, intent, null)
     }
 
     override fun getItemCount(): Int {

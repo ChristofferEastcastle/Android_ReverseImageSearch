@@ -3,6 +3,7 @@ package no.exam.android.activities
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
@@ -15,6 +16,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.Globals
 import no.exam.android.R
+import no.exam.android.activities.MainActivity.Fragment.*
 import no.exam.android.fragments.ResultsFragment
 import no.exam.android.fragments.SavedFragment
 import no.exam.android.fragments.UploadFragment
@@ -49,23 +51,45 @@ class MainActivity : AppCompatActivity() {
         getDummyData() {
             MainScope().launch {
                 val parseJSONArrayToImageDto = JsonParser.parseJSONArrayToImageDto(it)
-                bitmaps = Network.downloadAllAsBitmap(parseJSONArrayToImageDto)
+                bitmaps += Network.downloadAllAsBitmap(parseJSONArrayToImageDto)
             }
         }
     }
 
-    fun switchFragments(view: View) {
+    override fun onStart() {
+        super.onStart()
+        setTopBarListeners()
+    }
+
+    private fun setTopBarListeners() {
+        findViewById<Button>(R.id.UploadBtn)
+            .setOnClickListener {
+                switchFragments(UPLOAD_NEW)
+            }
+        findViewById<Button>(R.id.ResultsBtn)
+            .setOnClickListener {
+                switchFragments(RESULTS)
+            }
+        findViewById<Button>(R.id.SavedBtn)
+            .setOnClickListener {
+                switchFragments(SAVED)
+            }
+    }
+    enum class Fragment {
+        UPLOAD_NEW, RESULTS, SAVED
+    }
+    fun switchFragments(fragment: Fragment) {
         val transaction = supportFragmentManager.beginTransaction()
-        when (view.tag) {
-            "1" -> {
+        when (fragment) {
+            UPLOAD_NEW -> {
                 transaction
                     .replace(R.id.fragment_holder, UploadFragment(bitmaps))
             }
-            "2" -> {
+            RESULTS -> {
                 transaction
                     .replace(R.id.fragment_holder, ResultsFragment(bitmaps))
             }
-            "3" -> {
+            SAVED -> {
                 transaction
                     .replace(R.id.fragment_holder, SavedFragment())
             }

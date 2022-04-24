@@ -2,6 +2,7 @@ package no.exam.android.activities
 
 import android.graphics.BitmapFactory
 import android.os.Bundle
+import android.view.MenuItem
 import android.widget.Button
 import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
@@ -10,6 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
+import no.exam.android.activities.MainActivity.Fragment.RESULTS
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import javax.inject.Inject
@@ -19,9 +21,15 @@ class SavePopupActivity : AppCompatActivity() {
     @Inject
     lateinit var database: ImageRepo
     private lateinit var scope: CoroutineScope
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        (parent as MainActivity).switchFragments(RESULTS)
+        return super.onOptionsItemSelected(item)
+    }
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_save_popup)
+
+        //actionBar?.setDisplayHomeAsUpEnabled(true)
         scope = MainScope()
 
         val bytes = intent.extras?.get("IMAGE")

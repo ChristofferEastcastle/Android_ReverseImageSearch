@@ -12,6 +12,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.FragmentActivity
@@ -20,6 +21,8 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.MainScope
 import no.exam.android.R
+import no.exam.android.activities.MainActivity
+import no.exam.android.activities.MainActivity.Fragment.RESULTS
 import no.exam.android.repo.ImageRepo
 import no.exam.android.service.ImageService
 import javax.inject.Inject
@@ -45,16 +48,22 @@ class UploadFragment(
         imageService.onStartCommand(Intent(), Service.START_FLAG_REDELIVERY, 1)
         imageView = view.findViewById(R.id.image)
 
+        val mainActivity = requireActivity() as MainActivity
+        val view1 = TextView(context)
+        view.tag = "2"
 
         view.findViewById<Button>(R.id.AddPictureBtn)
             .setOnClickListener { addImage() }
         view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
             imageService.onClickUpload(imageUri, ::sendToResults)
+            mainActivity.switchFragments(RESULTS)
         }
+
         return view
     }
 
     private fun sendToResults(bitmaps: ArrayList<Deferred<Bitmap?>>) {
+        if (mainActivity.supportFragmentManager.isDestroyed) return
         mainActivity.supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_holder, ResultsFragment(bitmaps))

@@ -94,9 +94,12 @@ object Network {
     suspend fun downloadAllAsBitmap(imageDtoList: ArrayList<ImageDto>): ArrayList<Deferred<Bitmap?>> {
         val bitmaps = ArrayList<Deferred<Bitmap?>>()
         coroutineScope {
-            for ((imageLink) in imageDtoList) {
-                val deferredBitmap = async { downloadImageAsBitmap(imageLink) }
-                bitmaps.add(deferredBitmap)
+            for ((imageLink, thumbnailLink) in imageDtoList) {
+                bitmaps.add(async { downloadImageAsBitmap(imageLink) })
+
+                if (thumbnailLink != imageLink) {
+                    bitmaps.add(async { downloadImageAsBitmap(thumbnailLink) })
+                }
             }
         }
         return bitmaps

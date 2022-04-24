@@ -1,6 +1,5 @@
 package no.exam.android.activities
 
-import android.content.Intent
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.view.View
@@ -9,19 +8,21 @@ import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
 import com.androidnetworking.interfaces.JSONArrayRequestListener
-import com.google.gson.JsonArray
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.fragments.ResultsFragment
 import no.exam.android.fragments.SavedFragment
 import no.exam.android.fragments.UploadFragment
+import no.exam.android.repo.ImageRepo
 import no.exam.android.service.ImageService
 import no.exam.android.utils.JsonParser
 import no.exam.android.utils.Network
 import org.json.JSONArray
-import java.util.concurrent.CountDownLatch
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -30,6 +31,8 @@ class MainActivity : AppCompatActivity() {
 
     @Inject
     lateinit var imageService: ImageService
+    @Inject
+    lateinit var database: ImageRepo
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

@@ -1,24 +1,34 @@
 package no.exam.android.fragments
 
 import android.graphics.Bitmap
+import android.opengl.Visibility
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
+import android.widget.TextView
+import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
+import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
 import no.exam.android.models.Image
+import no.exam.android.service.ImageService
+import javax.inject.Inject
 
+@AndroidEntryPoint
 class ResultsFragment(
     var deferredBitmaps: ArrayList<Deferred<Bitmap?>>
 ) : Fragment() {
+    @Inject
+    lateinit var imageService: ImageService
     private val bitmaps: ArrayList<Bitmap> = ArrayList()
     private lateinit var recyclerView: RecyclerView
     private lateinit var scope: CoroutineScope
@@ -35,8 +45,20 @@ class ResultsFragment(
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
 
+        recyclerView.adapter = ImageAdapter(imageService.bitmapResults, requireActivity())
 
-        recyclerView.adapter = ImageAdapter(bitmaps, requireActivity())
+        when {
+            imageService.isLoadingImages -> {
+                view.findViewById<ProgressBar>(R.id.progressBar)
+                    .visibility = View.VISIBLE
+            }
+            imageService.bitmapResults.isEmpty() -> {
+                val textView = TextView(context)
+                textView.text = "No results found. Please upload a image."
+                view.findViewById<ConstraintLayout>(R.id.fragment_results)
+                    .addView(textView)
+            }
+        }
 
         addUpdateOnCompletion(deferredBitmaps)
 

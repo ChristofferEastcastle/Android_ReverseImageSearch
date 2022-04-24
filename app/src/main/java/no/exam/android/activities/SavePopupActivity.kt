@@ -16,7 +16,8 @@ import javax.inject.Inject
 
 @AndroidEntryPoint
 class SavePopupActivity : AppCompatActivity() {
-    @Inject lateinit var database: ImageRepo
+    @Inject
+    lateinit var database: ImageRepo
     private lateinit var scope: CoroutineScope
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -24,12 +25,10 @@ class SavePopupActivity : AppCompatActivity() {
         scope = MainScope()
 
         val bytes = intent.extras?.get("IMAGE")
-
         if (bytes !is ByteArray) return
 
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         findViewById<ImageView>(R.id.image).setImageBitmap(bitmap)
-
 
         findViewById<Button>(R.id.SaveImage).setOnClickListener {
             scope.launch {
@@ -37,5 +36,4 @@ class SavePopupActivity : AppCompatActivity() {
             }
         }
     }
-
 }

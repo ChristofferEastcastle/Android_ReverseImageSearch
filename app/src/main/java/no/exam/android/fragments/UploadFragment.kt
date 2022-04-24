@@ -43,10 +43,11 @@ class UploadFragment(
         mainActivity = requireActivity()
         imageService.database = database
         imageService.onStartCommand(Intent(), Service.START_FLAG_REDELIVERY, 1)
+        imageView = view.findViewById(R.id.image)
 
 
         view.findViewById<Button>(R.id.AddPictureBtn)
-            .setOnClickListener { addImage(view.findViewById(R.id.image)) }
+            .setOnClickListener { addImage() }
         view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
             imageService.onClickUpload(imageUri, ::sendToResults)
         }
@@ -58,12 +59,10 @@ class UploadFragment(
             .beginTransaction()
             .replace(R.id.fragment_holder, ResultsFragment(bitmaps))
             .commit()
-
     }
 
 
-    private fun addImage(view: ImageView) {
-        imageView = view
+    private fun addImage() {
         val intent = Intent(Intent.ACTION_PICK)
         intent.type = "image/*"
         resultLauncher.launch(intent)

@@ -20,8 +20,10 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.MainScope
 import no.exam.android.R
+import no.exam.android.activities.MainActivity
 import no.exam.android.repo.ImageRepo
 import no.exam.android.service.ImageService
+import java.text.AttributedCharacterIterator
 import javax.inject.Inject
 
 @AndroidEntryPoint
@@ -32,7 +34,7 @@ class UploadFragment(
     @Inject lateinit var imageService: ImageService
     private var imageUri: Uri? = null
     private var imageView: ImageView? = null
-    lateinit var mainActivity: FragmentActivity
+    private lateinit var mainActivity: MainActivity
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -40,7 +42,7 @@ class UploadFragment(
         savedInstanceState: Bundle?
     ): View? {
         val view = inflater.inflate(R.layout.fragment_upload, container, false)
-        mainActivity = requireActivity()
+        mainActivity = requireActivity() as MainActivity
         imageService.database = database
         imageService.onStartCommand(Intent(), Service.START_FLAG_REDELIVERY, 1)
         imageView = view.findViewById(R.id.image)
@@ -50,6 +52,8 @@ class UploadFragment(
             .setOnClickListener { addImage() }
         view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
             imageService.onClickUpload(imageUri, ::sendToResults)
+            if (imageUri != null)
+                mainActivity.switchFragments("2")
         }
         return view
     }

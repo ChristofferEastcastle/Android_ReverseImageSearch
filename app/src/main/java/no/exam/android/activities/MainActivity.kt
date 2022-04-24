@@ -54,6 +54,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    fun switchFragments(tag: String) {
+        val view = View(applicationContext)
+        view.tag = tag
+        switchFragments(view)
+    }
+
     fun switchFragments(view: View) {
         val transaction = supportFragmentManager.beginTransaction()
         when (view.tag) {

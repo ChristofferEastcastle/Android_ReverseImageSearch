@@ -12,4 +12,5 @@
     <string name="upload_new_tag">UPLOAD_NEW</string>
     <string name="results_tag">RESULTS</string>
     <string name="saved_tag">SAVED</string>
+    <string name="saved_parent_tag">SAVED_PARENT</string>
 </resources>

@@ -12,7 +12,7 @@ import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
 import no.exam.android.R.string.results_tag
-import no.exam.android.R.string.saved_tag
+import no.exam.android.R.string.saved_parent_tag
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
@@ -34,10 +34,16 @@ class ImagePopupActivity : AppCompatActivity() {
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         findViewById<ImageView>(R.id.image).setImageBitmap(bitmap)
 
-        findViewById<Button>(R.id.button).setOnClickListener {
-            when (tag) {
-                getString(results_tag) -> save(bytes)
-                getString(saved_tag) -> delete(bytes)
+        val button = findViewById<Button>(R.id.button)
+
+        when (tag) {
+            getString(results_tag) -> {
+                button.text = "SAVE"
+                button.setOnClickListener { save(bytes) }
+            }
+            getString(saved_parent_tag) -> {
+                button.text = "DELETE"
+                button.setOnClickListener { delete(bytes) }
             }
         }
     }

@@ -11,8 +11,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
-import no.exam.android.R.string.results_tag
-import no.exam.android.R.string.saved_parent_tag
+import no.exam.android.R.string.*
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
@@ -38,11 +37,11 @@ class ImagePopupActivity : AppCompatActivity() {
 
         when (tag) {
             getString(results_tag) -> {
-                button.text = "SAVE"
+                button.text = getString(save_button_text)
                 button.setOnClickListener { save(bytes) }
             }
             getString(saved_parent_tag) -> {
-                button.text = "DELETE"
+                button.text = getString(delete_button_text)
                 button.setOnClickListener { delete(bytes) }
             }
         }

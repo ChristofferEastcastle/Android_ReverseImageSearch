@@ -6,11 +6,14 @@ import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
 import com.androidnetworking.interfaces.BitmapRequestListener
 import com.androidnetworking.interfaces.JSONArrayRequestListener
+import com.androidnetworking.interfaces.OkHttpResponseListener
 import com.androidnetworking.interfaces.StringRequestListener
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import no.exam.android.Globals
 import no.exam.android.models.dtos.ImageDto
 import no.exam.android.utils.JsonParser.parseJSONArrayToImageDto
+import okhttp3.Response
 import org.json.JSONArray
 import java.io.File
 import java.util.concurrent.CountDownLatch
@@ -20,7 +23,7 @@ object Network {
         val latch = CountDownLatch(1)
         var imageDtoList = ArrayList<ImageDto>()
 
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             AndroidNetworking.get(url)
                 .build()
                 .getAsJSONArray(object : JSONArrayRequestListener {
@@ -42,7 +45,7 @@ object Network {
     suspend fun postImageToApi(imageFile: File): String? {
         var responseUrl: String? = null
         val latch = CountDownLatch(1)
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             AndroidNetworking.upload("${Globals.API_URL}/upload")
                 .addMultipartFile("image", imageFile)
                 .build()
@@ -69,7 +72,7 @@ object Network {
     private suspend fun downloadImageAsBitmap(imageLink: String): Bitmap? {
         var bitmap: Bitmap? = null
         val latch = CountDownLatch(1)
-        withContext(Dispatchers.IO) {
+        withContext(IO) {
             AndroidNetworking.get(imageLink)
                 .build()
                 .setDownloadProgressListener { bytesDownloaded, totalBytes ->
@@ -100,5 +103,19 @@ object Network {
             }
         }
         return bitmaps
+    }
+
+    suspend fun hasNetworkConnection(result: (Boolean) -> Unit) = withContext(IO) {
+        AndroidNetworking.get("https://www.google.com")
+            .build()
+            .getAsOkHttpResponse(object : OkHttpResponseListener {
+                override fun onResponse(response: Response?) {
+                    result.invoke(true)
+                }
+
+                override fun onError(anError: ANError?) {
+                    result.invoke(false)
+                }
+            })
     }
 }

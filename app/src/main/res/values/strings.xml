@@ -8,4 +8,5 @@
     <string name="saved">Saved</string>
     <string name="no_image_found">No results found. Please upload an image.</string>
     <string name="save_image">Save Image</string>
+    <string name="no_network">No network available.</string>
 </resources>

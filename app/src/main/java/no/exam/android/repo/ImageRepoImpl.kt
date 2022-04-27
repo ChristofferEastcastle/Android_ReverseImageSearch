@@ -16,7 +16,8 @@ import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
 import no.exam.android.utils.ImageUtil
 import javax.inject.Inject
 
-class ImageRepoImpl @Inject constructor(@ApplicationContext context: Context) : ImageRepo,
+class ImageRepoImpl
+@Inject constructor(@ApplicationContext context: Context) : ImageRepo,
     SQLiteOpenHelper(context, DATABASE_NAME, null, DATABASE_VERSION) {
 
     @SuppressLint("Recycle")

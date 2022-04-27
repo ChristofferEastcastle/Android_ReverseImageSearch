@@ -40,10 +40,7 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
         }
     }
 
-    private fun onClickImage(
-        position: Int
-    ) {
-
+    private fun onClickImage(position: Int) {
         val intent = Intent(context, SavePopupActivity::class.java)
         val image = imageList[position]
         val stream = ByteArrayOutputStream()

@@ -59,6 +59,7 @@ class UploadFragment(
     }
 
     private fun sendToResults(bitmaps: ArrayList<Deferred<Bitmap?>>) {
+        if (mainActivity.supportFragmentManager.isDestroyed) return
         mainActivity.supportFragmentManager
             .beginTransaction()
             .replace(R.id.fragment_holder, ResultsFragment(bitmaps))

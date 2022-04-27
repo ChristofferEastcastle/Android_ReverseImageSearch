@@ -12,18 +12,6 @@
         android:orientation="horizontal"
         app:layout_constraintTop_toTopOf="parent">
 
-    <!--<ImageView
-            android:id="@+id/original"
-            android:layout_width="0dp"
-            android:layout_height="200dp"
-            android:layout_weight="1"
-            android:layout_margin="10dp"
-            android:scaleType="centerCrop"
-            app:shapeAppearanceOverlay="@style/RoundCorner"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintTop_toTopOf="parent" /> -->
-
     <include
             layout="@layout/list_item"
             android:id="@+id/original"

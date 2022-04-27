@@ -33,14 +33,14 @@ class SavedFragment : Fragment() {
     ): View? {
         scope = MainScope()
         val view = inflater.inflate(R.layout.fragment_saved, container, false)
+        val recyclerView = view.findViewById<RecyclerView>(R.id.RecyclerView)
+        recyclerView.layoutManager = LinearLayoutManager(requireContext())
+        recyclerView.setHasFixedSize(false)
+        recyclerView.adapter = ParentAdapter(ArrayList(), requireContext())
 
         scope.launch(IO) {
             val items = database.findAllSaved()
-
             withContext(Main) {
-                val recyclerView = view.findViewById<RecyclerView>(R.id.RecyclerView)
-                recyclerView.layoutManager = LinearLayoutManager(context)
-                recyclerView.setHasFixedSize(false)
                 recyclerView.adapter = ParentAdapter(items, requireContext())
             }
         }

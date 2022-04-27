@@ -8,8 +8,8 @@
 
     <ImageView
             android:id="@+id/image"
-            android:layout_width="331dp"
-            android:layout_height="384dp"
+            android:layout_width="352dp"
+            android:layout_height="486dp"
             android:background="@drawable/ic_launcher_foreground"
             android:layout_margin="20dp"
             app:layout_constraintTop_toTopOf="parent"
@@ -20,32 +20,11 @@
             android:id="@+id/SaveImage"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="Save Image"
-            app:layout_constraintTop_toBottomOf="@+id/image"
-            app:layout_constraintBottom_toBottomOf="parent"
+            android:text="@string/save_image"
             app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintEnd_toStartOf="@+id/constraintLayout" />
-
-
-    <Button
-            android:id="@+id/UploadBtn"
-            android:text="@string/upload"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginHorizontal="10dp"
-            app:layout_constraintTop_toBottomOf="@+id/image"
-            app:layout_constraintBottom_toBottomOf="parent"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toEndOf="@+id/constraintLayout" />
+            app:layout_constraintTop_toBottomOf="@+id/image" />
 
-    <androidx.constraintlayout.widget.ConstraintLayout
-            android:layout_width="10dp"
-            android:layout_height="10dp"
-            app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintStart_toStartOf="parent"
-            app:layout_constraintTop_toBottomOf="@+id/image"
-            android:id="@+id/constraintLayout" />
 
 
 

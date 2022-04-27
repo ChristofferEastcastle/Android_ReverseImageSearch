@@ -10,6 +10,7 @@ import java.io.File
 
 object ImageUtil {
     fun getBytes(imageUri: Uri, context: Context): ByteArray {
+        // Example of using elvis operator. In this case we just return empty array if we cannot read from uri.
         return context.contentResolver.openInputStream(imageUri)?.readBytes() ?: byteArrayOf()
     }
 

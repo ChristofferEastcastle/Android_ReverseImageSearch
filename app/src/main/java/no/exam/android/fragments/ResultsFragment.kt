@@ -15,6 +15,7 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.Globals
 import no.exam.android.R
@@ -54,7 +55,7 @@ class ResultsFragment(
             }
             imageService.bitmapResults.isEmpty() -> {
                 val textView = TextView(context)
-                textView.text = "No results found. Please upload a image."
+                textView.text = getString(R.string.no_image_found)
                 view.findViewById<ConstraintLayout>(R.id.fragment_results)
                     .addView(textView)
             }
@@ -65,20 +66,18 @@ class ResultsFragment(
         return view
     }
 
-    fun addUpdateOnCompletion(
+    private fun addUpdateOnCompletion(
         deferredBitmaps: ArrayList<Deferred<Bitmap?>>
     ) {
         for (deferred in deferredBitmaps) {
             deferred.invokeOnCompletion {
-                scope.launch(Dispatchers.IO) {
+                scope.launch(IO) {
                     val bitmap = deferred.await()
                     bitmap?.let {
                         // If bitmap is not null we add it to the list of bitmaps then notify recyclerview of insertion.
-                        //if (bitmaps.contains(bitmap)) return@launch
                         bitmaps += bitmap
                         withContext(Main) {
                             recyclerView.adapter?.notifyItemInserted(bitmaps.size - 1)
-                            Log.d(Globals.TAG, "Inserted!")
                         }
                     }
                 }

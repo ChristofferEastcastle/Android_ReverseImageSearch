@@ -7,11 +7,12 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.IBinder
 import android.widget.Toast
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.*
-import no.exam.android.Globals
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.Dispatchers.Main
+import no.exam.android.Globals.Companion.API_URL
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.utils.ImageUtil
@@ -57,8 +58,8 @@ class ImageService @Inject constructor(@ApplicationContext val context: Context)
         isLoadingImages = true
 
         val imageBytes = ImageUtil.getBytes(imageUri, context)
-        scope.launch(Dispatchers.IO) {
-            withContext(Dispatchers.Main) {
+        scope.launch(IO) {
+            withContext(Main) {
                 Toast.makeText(context, "Uploading...", Toast.LENGTH_LONG).show()
             }
             val imageFile = ImageUtil.createTempImageFile(imageBytes)
@@ -68,23 +69,23 @@ class ImageService @Inject constructor(@ApplicationContext val context: Context)
                 database.saveCurrent(Image(compressed.readBytes()))
             }
             for (endpoint in endpoints) {
-                launch {
+                launch(IO) {
                     val imageDtoList =
-                        Network.fetchImagesAsDtoList("${Globals.API_URL}/$endpoint?url=$apiResponseUrl")
+                        Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
 
                     val deferredBitmaps = Network.downloadAllAsBitmap(imageDtoList)
                     for (deferred in deferredBitmaps) {
                         deferred.invokeOnCompletion {
-                            scope.launch {
-                                val element = deferred.await()
-                                element?.let { bitmapResults.add(element) }
+                            scope.launch invoke@ {
+                                val element = deferred.await() ?: return@invoke
+                                bitmapResults.add(element)
                             }
                         }
                     }
                     callback.invoke(deferredBitmaps)
+                    isLoadingImages = false
                 }
             }
-            isLoadingImages = false
         }
     }
 }

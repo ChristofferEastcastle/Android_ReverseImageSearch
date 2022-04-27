@@ -1,8 +1,10 @@
 package no.exam.android.activities
 
 import android.graphics.Bitmap
+import android.graphics.Color
 import android.os.Bundle
 import android.view.View
+import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
 import com.androidnetworking.error.ANError
@@ -41,10 +43,7 @@ class MainActivity : AppCompatActivity() {
         AndroidNetworking.initialize(applicationContext)
         AndroidNetworking.enableLogging(HttpLoggingInterceptor.Level.HEADERS)
 
-        supportFragmentManager
-            .beginTransaction()
-            .replace(R.id.fragment_holder, UploadFragment(bitmaps))
-            .commit()
+        switchFragments(findViewById(R.id.UploadNewImageButton))
 
         getDummyData() {
             MainScope().launch {

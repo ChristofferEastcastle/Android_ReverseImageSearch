@@ -4,6 +4,7 @@ import android.graphics.BitmapFactory
 import android.os.Bundle
 import android.widget.Button
 import android.widget.ImageView
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
@@ -34,6 +35,7 @@ class SavePopupActivity : AppCompatActivity() {
             scope.launch {
                 database.insertImageToSaved(Image(bytes))
             }
+            Toast.makeText(applicationContext, "Saved!", Toast.LENGTH_LONG).show()
         }
     }
 }

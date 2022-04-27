@@ -26,14 +26,16 @@ class ImageService
 @Inject constructor(@ApplicationContext val context: Context)
     : Service() {
     var isLoadingImages = false
+    val liveData = LiveMutableData<ArrayList<Bitmap>>()
     val bitmapResults = ArrayList<Bitmap>()
+
     private val endpoints = listOf("google", "bing", "tineye")
 
     @Inject
     lateinit var database: ImageRepo
     private val scope = MainScope()
 
-    fun onClickUpload(imageUri: Uri?, callback: KFunction1<ArrayList<Deferred<Bitmap?>>, Unit>) {
+    fun uploadImage(imageUri: Uri?) {
         if (imageUri == null) {
             Toast.makeText(context, "No image added...", Toast.LENGTH_LONG).show()
             return
@@ -49,7 +51,7 @@ class ImageService
             val imageFile = ImageUtil.createTempImageFile(imageBytes)
             val compressed = Compressor.compress(context, imageFile)
             val apiResponseUrl = Network.postImageToApi(compressed) ?: return@launch
-            launch(Dispatchers.Unconfined) {
+            launch(IO) {
                 database.saveCurrent(Image(compressed.readBytes()))
             }
             for (endpoint in endpoints) {
@@ -66,8 +68,9 @@ class ImageService
                             }
                         }
                     }
-                    callback.invoke(deferredBitmaps)
-                    isLoadingImages = false
+                    withContext(Main) {
+                        liveData.value = bitmapResults
+                    }
                 }
             }
         }

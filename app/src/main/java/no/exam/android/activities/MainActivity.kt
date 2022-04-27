@@ -3,6 +3,7 @@ package no.exam.android.activities
 import android.graphics.Bitmap
 import android.graphics.Color
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import android.widget.Button
 import androidx.appcompat.app.AppCompatActivity
@@ -53,6 +54,16 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    override fun onPause() {
+        super.onPause()
+        Log.d(Globals.TAG, "On pause")
+    }
+
+    override fun onResume() {
+        super.onResume()
+        Log.d(Globals.TAG, "On resume")
+    }
+
     fun switchFragments(tag: String) {
         val view = View(applicationContext)
         view.tag = tag
@@ -64,11 +75,11 @@ class MainActivity : AppCompatActivity() {
         when (view.tag) {
             "1" -> {
                 transaction
-                    .replace(R.id.fragment_holder, UploadFragment(bitmaps))
+                    .replace(R.id.fragment_holder, UploadFragment())
             }
             "2" -> {
                 transaction
-                    .replace(R.id.fragment_holder, ResultsFragment(bitmaps))
+                    .replace(R.id.fragment_holder, ResultsFragment())
             }
             "3" -> {
                 transaction

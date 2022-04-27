@@ -36,19 +36,14 @@ class ImageAdapter(private val imageList: ArrayList<Bitmap>, private val context
         val image = holder.image
         image.setImageBitmap(currentImage)
         image.setOnClickListener {
-            onClickImage(position, holder)
+            onClickImage(position)
         }
     }
 
     private fun onClickImage(
-        position: Int,
-        holder: ViewHolder
+        position: Int
     ) {
-        Toast.makeText(
-            viewGroup?.context,
-            "Position: $position ID: ${holder.itemId}",
-            Toast.LENGTH_SHORT
-        ).show()
+
         val intent = Intent(context, SavePopupActivity::class.java)
         val image = imageList[position]
         val stream = ByteArrayOutputStream()

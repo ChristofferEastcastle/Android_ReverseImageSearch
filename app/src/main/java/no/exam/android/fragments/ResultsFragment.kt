@@ -22,12 +22,14 @@ import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
 import no.exam.android.models.Image
 import no.exam.android.service.ImageService
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class ResultsFragment(
     var deferredBitmaps: ArrayList<Deferred<Bitmap?>>
-) : Fragment() {
+) : Fragment(), Observer {
     @Inject
     lateinit var imageService: ImageService
     private val bitmaps: ArrayList<Bitmap> = ArrayList()
@@ -83,6 +85,10 @@ class ResultsFragment(
                 }
             }
         }
+    }
+
+    override fun update(p0: Observable?, p1: Any?) {
+
     }
 
 }

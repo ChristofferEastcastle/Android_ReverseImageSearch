@@ -17,37 +17,21 @@ import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.utils.ImageUtil
 import no.exam.android.utils.Network
+import java.util.*
 import javax.inject.Inject
+import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
 
-class ImageService @Inject constructor(@ApplicationContext val context: Context) : Service() {
+class ImageService
+@Inject constructor(@ApplicationContext val context: Context)
+    : Service() {
     var isLoadingImages = false
     val bitmapResults = ArrayList<Bitmap>()
     private val endpoints = listOf("google", "bing", "tineye")
 
     @Inject
     lateinit var database: ImageRepo
-    private lateinit var scope: CoroutineScope
-
-    override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int {
-        scope = MainScope()
-        Toast.makeText(context, "OnStartCommand in ImageService", Toast.LENGTH_LONG).show()
-        return super.onStartCommand(intent, flags, startId)
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-        Toast.makeText(context, "OnCreate Service", Toast.LENGTH_LONG).show()
-    }
-
-    override fun onDestroy() {
-        super.onDestroy()
-        Toast.makeText(context, "OnDestroy Service", Toast.LENGTH_LONG).show()
-    }
-
-    override fun onBind(p0: Intent?): IBinder? {
-        return null
-    }
+    private val scope = MainScope()
 
     fun onClickUpload(imageUri: Uri?, callback: KFunction1<ArrayList<Deferred<Bitmap?>>, Unit>) {
         if (imageUri == null) {
@@ -76,7 +60,7 @@ class ImageService @Inject constructor(@ApplicationContext val context: Context)
                     val deferredBitmaps = Network.downloadAllAsBitmap(imageDtoList)
                     for (deferred in deferredBitmaps) {
                         deferred.invokeOnCompletion {
-                            scope.launch invoke@ {
+                            scope.launch invoke@{
                                 val element = deferred.await() ?: return@invoke
                                 bitmapResults.add(element)
                             }
@@ -87,5 +71,10 @@ class ImageService @Inject constructor(@ApplicationContext val context: Context)
                 }
             }
         }
+    }
+
+    // This service is bound to the application lifecycle. We do not need to do anything specific here.
+    override fun onBind(p0: Intent?): IBinder? {
+        return null
     }
 }

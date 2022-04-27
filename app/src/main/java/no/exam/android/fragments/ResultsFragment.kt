@@ -1,29 +1,20 @@
 package no.exam.android.fragments
 
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ProgressBar
 import android.widget.TextView
-import androidx.constraintlayout.widget.ConstraintLayout
-import androidx.core.widget.ContentLoadingProgressBar
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import kotlinx.coroutines.Dispatchers.IO
-import kotlinx.coroutines.Dispatchers.Main
-import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.adapters.ImageAdapter
 import no.exam.android.service.ImageService
-import java.util.*
 import javax.inject.Inject
-import kotlin.collections.ArrayList
 
 @AndroidEntryPoint
 class ResultsFragment : Fragment() {
@@ -33,49 +24,73 @@ class ResultsFragment : Fragment() {
     private lateinit var scope: CoroutineScope
     private lateinit var loadingProgressBar: ProgressBar
     private lateinit var textView: TextView
+    private lateinit var fragmentView: View
+    private var downloadDelay: Job? = null
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
+        fragmentView = inflater.inflate(R.layout.fragment_results, container, false)
         scope = MainScope()
+        loadingProgressBar = fragmentView.findViewById(R.id.progressBar)
+        textView = fragmentView.findViewById(R.id.no_image_found)
+        checkIfLoading()
 
-        val view = inflater.inflate(R.layout.fragment_results, container, false)
-        recyclerView = view.findViewById(R.id.ResultsRecyclerView)
+        recyclerView = fragmentView.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
-
         recyclerView.adapter = ImageAdapter(arrayListOf(), requireActivity())
-        loadingProgressBar = view.findViewById(R.id.progressBar)
 
-        textView = TextView(context)
-        textView.text = getString(R.string.no_image_found)
-        view.findViewById<ConstraintLayout>(R.id.fragment_results)
-            .addView(textView)
-        textView.visibility = View.INVISIBLE
-
-        when {
-            imageService.isLoadingImages -> {
-                loadingProgressBar
-                    .visibility = View.VISIBLE
-            }
-            else -> {
-                textView.visibility = View.VISIBLE
-            }
-        }
         // Observing state of live data loaded from ImageService
-        imageService.liveData.observe(viewLifecycleOwner, ::updateView)
+        imageService.isLoadingImages.observe(viewLifecycleOwner, ::updateView)
+        if (imageService.isLoadingImages.value == true) {
+            downloadDelay = scope.launch { downloadDelay() }
+        }
 
-        return view
+        return fragmentView
     }
 
-    private fun updateView(bitmaps: ArrayList<Bitmap>) {
-        recyclerView.adapter = ImageAdapter(bitmaps, requireContext())
+    private suspend fun downloadDelay() {
+        while (imageService.isLoadingImages.value == true) {
+            delay(10000)
+            if (imageService.bitmapResults.isEmpty()) {
+                imageService.isLoadingImages.removeObserver(::updateView)
+                checkIfLoading()
+            }
+        }
+    }
+
+    private fun checkIfLoading() {
+        when (imageService.isLoadingImages.value) {
+            true -> {
+                loadingProgressBar.visibility = View.VISIBLE
+                textView.visibility = View.INVISIBLE
+            }
+            else -> {
+                if (imageService.bitmapResults.isEmpty()) {
+                    textView.visibility = View.VISIBLE
+                    loadingProgressBar.visibility = View.INVISIBLE
+                }
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        checkIfLoading()
+    }
+
+
+    private fun updateView(isLoadingData: Boolean) {
+        if (isLoadingData) return
+        recyclerView.adapter = ImageAdapter(imageService.bitmapResults, requireContext())
         loadingProgressBar.visibility = View.INVISIBLE
 
-        if (bitmaps.size == 0) {
+        if (imageService.bitmapResults.size == 0) {
             textView.visibility = View.VISIBLE
         }
+        downloadDelay?.cancel(CancellationException("Results received!"))
     }
 }

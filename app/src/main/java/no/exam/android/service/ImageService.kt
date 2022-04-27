@@ -7,6 +7,7 @@ import android.graphics.Bitmap
 import android.net.Uri
 import android.os.IBinder
 import android.widget.Toast
+import androidx.lifecycle.MutableLiveData
 import dagger.hilt.android.qualifiers.ApplicationContext
 import id.zelory.compressor.Compressor
 import kotlinx.coroutines.*
@@ -23,12 +24,9 @@ import kotlin.collections.ArrayList
 import kotlin.reflect.KFunction1
 
 class ImageService
-@Inject constructor(@ApplicationContext val context: Context)
-    : Service() {
-    var isLoadingImages = false
-    val liveData = LiveMutableData<ArrayList<Bitmap>>()
+@Inject constructor(@ApplicationContext val context: Context) : Service() {
+    var isLoadingImages = MutableLiveData<Boolean>()
     val bitmapResults = ArrayList<Bitmap>()
-
     private val endpoints = listOf("google", "bing", "tineye")
 
     @Inject
@@ -40,8 +38,9 @@ class ImageService
             Toast.makeText(context, "No image added...", Toast.LENGTH_LONG).show()
             return
         }
+
+        isLoadingImages.value = true
         bitmapResults.clear()
-        isLoadingImages = true
 
         val imageBytes = ImageUtil.getBytes(imageUri, context)
         scope.launch(IO) {
@@ -60,6 +59,7 @@ class ImageService
                         Network.fetchImagesAsDtoList("$API_URL/$endpoint?url=$apiResponseUrl")
 
                     val deferredBitmaps = Network.downloadAllAsBitmap(imageDtoList)
+
                     for (deferred in deferredBitmaps) {
                         deferred.invokeOnCompletion {
                             scope.launch invoke@{
@@ -69,7 +69,7 @@ class ImageService
                         }
                     }
                     withContext(Main) {
-                        liveData.value = bitmapResults
+                        isLoadingImages.value = false
                     }
                 }
             }

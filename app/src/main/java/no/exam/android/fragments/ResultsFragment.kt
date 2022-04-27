@@ -1,5 +1,6 @@
 package no.exam.android.fragments
 
+import android.annotation.SuppressLint
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
@@ -41,7 +42,7 @@ class ResultsFragment : Fragment() {
         recyclerView = fragmentView.findViewById(R.id.ResultsRecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(context)
         recyclerView.setHasFixedSize(false)
-        recyclerView.adapter = ImageAdapter(arrayListOf(), requireActivity())
+        recyclerView.adapter = ImageAdapter(imageService.bitmapResults)
 
         // Observing state of live data loaded from ImageService
         imageService.isLoadingImages.observe(viewLifecycleOwner, ::updateView)
@@ -82,10 +83,10 @@ class ResultsFragment : Fragment() {
         checkIfLoading()
     }
 
-
     private fun updateView(isLoadingData: Boolean) {
         if (isLoadingData) return
-        recyclerView.adapter = ImageAdapter(imageService.bitmapResults, requireContext())
+        recyclerView.adapter
+            ?.notifyItemRangeInserted(0, imageService.bitmapResults.size -1)
         loadingProgressBar.visibility = View.INVISIBLE
 
         if (imageService.bitmapResults.size == 0) {

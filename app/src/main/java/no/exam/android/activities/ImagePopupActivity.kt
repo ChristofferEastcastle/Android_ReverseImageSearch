@@ -11,31 +11,47 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
+import no.exam.android.R.string.results_tag
+import no.exam.android.R.string.saved_tag
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
+import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
 import javax.inject.Inject
 
 @AndroidEntryPoint
-class SavePopupActivity : AppCompatActivity() {
+class ImagePopupActivity : AppCompatActivity() {
     @Inject
     lateinit var database: ImageRepo
     private lateinit var scope: CoroutineScope
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_save_popup)
+        setContentView(R.layout.activity_image_popup)
         scope = MainScope()
 
-        val bytes = intent.extras?.get("IMAGE")
-        if (bytes !is ByteArray) return
+        val bytes = intent.extras?.get("IMAGE") as ByteArray? ?: return
+        val tag = intent.extras?.get("PARENT_TAG") as String? ?: return
 
         val bitmap = BitmapFactory.decodeByteArray(bytes, 0, bytes.size)
         findViewById<ImageView>(R.id.image).setImageBitmap(bitmap)
 
-        findViewById<Button>(R.id.SaveImage).setOnClickListener {
-            scope.launch {
-                database.insertImageToSaved(Image(bytes))
+        findViewById<Button>(R.id.button).setOnClickListener {
+            when (tag) {
+                getString(results_tag) -> save(bytes)
+                getString(saved_tag) -> delete(bytes)
             }
-            Toast.makeText(applicationContext, "Saved!", Toast.LENGTH_LONG).show()
+        }
+    }
+
+    private fun save(bytes: ByteArray) {
+        scope.launch {
+            database.insertImageToSaved(Image(bytes))
+        }
+        Toast.makeText(applicationContext, "Saved!", Toast.LENGTH_LONG).show()
+    }
+
+    private fun delete(bytes: ByteArray) {
+        scope.launch {
+            database.deleteById(-5, SAVED_IMAGES)
         }
     }
 }

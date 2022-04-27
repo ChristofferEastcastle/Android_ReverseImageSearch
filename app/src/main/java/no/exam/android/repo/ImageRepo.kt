@@ -16,7 +16,11 @@ interface ImageRepo {
 
     suspend fun findSavedByOriginalId(table: Table, originalId: Int): List<ImageEntity>
 
+    suspend fun findByWhere(table: Table, where: String, arg: String): ArrayList<ImageEntity>
+
     suspend fun findAllSaved(): ArrayList<ParentItem>
+
+    suspend fun deleteById(id: Int, table: Table)
 
     enum class Table {
         ORIGINALS,

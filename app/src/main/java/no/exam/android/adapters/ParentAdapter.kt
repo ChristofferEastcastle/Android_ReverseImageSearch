@@ -1,8 +1,6 @@
 package no.exam.android.adapters
 
 import android.content.Context
-import android.graphics.Bitmap
-import android.graphics.BitmapFactory
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -12,13 +10,15 @@ import androidx.recyclerview.widget.LinearLayoutManager.HORIZONTAL
 import androidx.recyclerview.widget.RecyclerView
 import dagger.hilt.android.qualifiers.ApplicationContext
 import no.exam.android.R
-import no.exam.android.models.ParentItem
-import no.exam.android.utils.ImageUtil.bytesToBitmap
+import no.exam.android.entities.ImageEntity
+import no.exam.android.utils.ImageUtil
+import javax.inject.Inject
 
-class ParentAdapter(
-    private val parentList: List<ParentItem>,
-    @ApplicationContext private val context: Context
+class ParentAdapter @Inject constructor(
+    private val itemList: List<Pair<ImageEntity, List<ImageEntity>>>,
+    private val context: Context,
 ) : RecyclerView.Adapter<ParentAdapter.ViewHolder>() {
+
 
     var viewGroup: ViewGroup? = null
 
@@ -32,16 +32,17 @@ class ParentAdapter(
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {
-        val parentItem = parentList[position]
-        holder.original.setImageBitmap(parentItem.original)
+        val parentItem = itemList[position]
+        val originalBitmap = ImageUtil.bytesToBitmap(parentItem.first.bytes)
+        holder.original.setImageBitmap(originalBitmap)
         val images = holder.images
         images.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
         images.setHasFixedSize(false)
-        images.adapter = ImageAdapter(parentItem.images, context)
+        images.adapter = ImageAdapter(parentItem.second.map { ImageUtil.bytesToBitmap(it.bytes) })
     }
 
     override fun getItemCount(): Int {
-        return parentList.size
+        return itemList.size
     }
 
     class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {

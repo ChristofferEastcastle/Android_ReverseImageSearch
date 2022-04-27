@@ -8,6 +8,8 @@ import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
 import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.Dispatchers.IO
+import kotlinx.coroutines.withContext
 import no.exam.android.entities.ImageEntity
 import no.exam.android.models.Image
 import no.exam.android.models.ParentItem
@@ -76,6 +78,15 @@ class ImageRepoImpl
         return parentItems
     }
 
+    override suspend fun deleteById(id: Int, table: Table) = withContext(IO) {
+        writableDatabase.delete(
+            table.name.lowercase(),
+            "id = ?",
+            arrayOf(id.toString())
+        )
+        return@withContext
+    }
+
     override suspend fun findAll(table: Table): List<ImageEntity> {
         val cursor = readableDatabase.rawQuery(
             "select * from ${table.name.lowercase()}", null
@@ -85,12 +96,11 @@ class ImageRepoImpl
             list += run {
                 val id = cursor.getInt(0)
                 val blob = cursor.getBlob(1)
-                var originals: List<ImageEntity>? = null
+                var originalId: Int? = null
                 if (table == SAVED_IMAGES) {
-                    val originalId = cursor.getInt(2)
-                    originals = findSavedByOriginalId(SAVED_IMAGES, originalId)
+                    originalId = cursor.getInt(2)
                 }
-                ImageEntity(id, blob, originals)
+                ImageEntity(id, blob, originalId)
             }
         }
         return list
@@ -107,6 +117,28 @@ class ImageRepoImpl
                 val id = cursor.getInt(0)
                 val blob = cursor.getBlob(1)
                 ImageEntity(id, blob)
+            }
+        }
+        return list
+    }
+
+    @SuppressLint("Recycle")
+    override suspend fun findByWhere(table: Table, where: String, arg: String): ArrayList<ImageEntity> {
+        val cursor = readableDatabase.query(
+            table.name.lowercase(),
+            arrayOf("id", "image"),
+            where,
+            arrayOf(arg),
+            null,
+            null,
+            null
+        )
+        val list = arrayListOf<ImageEntity>()
+        while (cursor.moveToNext()) {
+            list += run {
+                val id = cursor.getInt(0)
+                val image = cursor.getBlob(1)
+                ImageEntity(id, image)
             }
         }
         return list

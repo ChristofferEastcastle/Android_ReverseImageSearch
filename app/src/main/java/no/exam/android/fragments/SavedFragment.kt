@@ -17,7 +17,9 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import no.exam.android.R
 import no.exam.android.adapters.ParentAdapter
+import no.exam.android.entities.ImageEntity
 import no.exam.android.repo.ImageRepo
+import no.exam.android.repo.ImageRepo.Table.ORIGINALS
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
 import javax.inject.Inject
 
@@ -36,15 +38,21 @@ class SavedFragment : Fragment() {
         val recyclerView = view.findViewById<RecyclerView>(R.id.RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.setHasFixedSize(false)
-        recyclerView.adapter = ParentAdapter(ArrayList(), requireContext())
+        recyclerView.adapter = ParentAdapter(arrayListOf(), requireContext())
 
         scope.launch(IO) {
-            val items = database.findAllSaved()
+            val items = database.findAll(ORIGINALS)
+
+            val itemList = ArrayList<Pair<ImageEntity, MutableList<ImageEntity>>>()
+            items.forEach {
+                val saved = database.findByWhere(SAVED_IMAGES, "original = ?", it.id.toString())
+                itemList.add(Pair(it, saved))
+            }
+
             withContext(Main) {
-                recyclerView.adapter = ParentAdapter(items, requireContext())
+                recyclerView.adapter = ParentAdapter(itemList, requireContext())
             }
         }
         return view
     }
-
 }

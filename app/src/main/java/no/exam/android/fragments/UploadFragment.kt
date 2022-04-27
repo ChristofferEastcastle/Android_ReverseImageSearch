@@ -15,14 +15,13 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import no.exam.android.R
+import no.exam.android.R.string.results_tag
 import no.exam.android.activities.MainActivity
 import no.exam.android.repo.ImageRepo
 import no.exam.android.service.ImageService
-import no.exam.android.utils.Network
 import no.exam.android.utils.Network.hasNetworkConnection
 import javax.inject.Inject
 
@@ -49,9 +48,8 @@ class UploadFragment : Fragment() {
 
         view.findViewById<Button>(R.id.AddPictureBtn)
             .setOnClickListener { addImage() }
-        view.findViewById<Button>(R.id.UploadBtn).setOnClickListener {
-            scope.launch(IO) { onClickUpload() }
-        }
+        view.findViewById<Button>(R.id.UploadBtn)
+            .setOnClickListener { scope.launch { onClickUpload() } }
         return view
     }
 
@@ -66,7 +64,7 @@ class UploadFragment : Fragment() {
         imageService.uploadImage(imageUri)
         if (imageUri != null) {
             val mainActivity = requireActivity() as MainActivity?
-            mainActivity?.switchFragments("2")
+            mainActivity?.switchFragments(getString(results_tag))
         }
     }
 

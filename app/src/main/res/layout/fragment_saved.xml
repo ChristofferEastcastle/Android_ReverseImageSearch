@@ -8,6 +8,20 @@
         android:tag="@string/saved_tag"
         tools:context="fragments.SavedFragment">
 
+    <TextView
+            android:id="@+id/text"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/no_saved_images_found"
+            android:textAlignment="center"
+            android:visibility="invisible"
+            android:textSize="20sp"
+
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintBottom_toBottomOf="@+id/RecyclerView"
+            app:layout_constraintEnd_toEndOf="@+id/RecyclerView"
+            app:layout_constraintTop_toTopOf="@+id/RecyclerView" />
+
     <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -40,7 +54,6 @@
             android:layout_height="match_parent"
             app:layout_constraintEnd_toEndOf="parent"
             android:layout_marginBottom="40dp"
-
             app:layout_constraintStart_toStartOf="parent">
 
     </androidx.recyclerview.widget.RecyclerView>

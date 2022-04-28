@@ -1,15 +1,10 @@
 package no.exam.android.activities
 
-import android.content.Intent
-import android.os.Build
 import android.os.Bundle
 import android.widget.Button
-import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
-import androidx.navigation.NavController
-import androidx.navigation.findNavController
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.MainScope
@@ -17,7 +12,6 @@ import kotlinx.coroutines.launch
 import no.exam.android.R
 import no.exam.android.R.string.*
 import no.exam.android.entities.ImageEntity
-import no.exam.android.fragments.SavedFragment
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES

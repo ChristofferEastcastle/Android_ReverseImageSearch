@@ -1,20 +1,11 @@
 package no.exam.android.activities
 
-import android.graphics.Bitmap
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import com.androidnetworking.AndroidNetworking
-import com.androidnetworking.error.ANError
 import com.androidnetworking.interceptors.HttpLoggingInterceptor
-import com.androidnetworking.interfaces.JSONArrayRequestListener
 import dagger.hilt.android.AndroidEntryPoint
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.MainScope
-import kotlinx.coroutines.launch
-import no.exam.android.Globals
 import no.exam.android.R
 import no.exam.android.R.string.*
 import no.exam.android.fragments.ResultsFragment
@@ -22,15 +13,10 @@ import no.exam.android.fragments.SavedFragment
 import no.exam.android.fragments.UploadFragment
 import no.exam.android.repo.ImageRepo
 import no.exam.android.service.ImageService
-import no.exam.android.utils.JsonParser
-import no.exam.android.utils.Network
-import org.json.JSONArray
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : AppCompatActivity() {
-    private var bitmaps: ArrayList<Deferred<Bitmap?>> = ArrayList()
-
     @Inject
     lateinit var imageService: ImageService
 
@@ -45,13 +31,6 @@ class MainActivity : AppCompatActivity() {
         AndroidNetworking.enableLogging(HttpLoggingInterceptor.Level.HEADERS)
 
         switchFragments(getString(upload_new_tag))
-
-        getDummyData() {
-            MainScope().launch {
-                val parseJSONArrayToImageDto = JsonParser.parseJSONArrayToImageDto(it)
-                bitmaps = Network.downloadAllAsBitmap(parseJSONArrayToImageDto)
-            }
-        }
     }
 
     fun switchFragments(tag: String) {
@@ -77,21 +56,5 @@ class MainActivity : AppCompatActivity() {
             }
         }
         transaction.commit()
-    }
-
-    private fun getDummyData(callback: (JSONArray) -> Unit) {
-        MainScope().launch(Dispatchers.IO) {
-            AndroidNetworking.get("http://192.168.1.230:3000")
-                .build()
-                .getAsJSONArray(object : JSONArrayRequestListener {
-                    override fun onResponse(response: JSONArray) {
-                        callback.invoke(response)
-                    }
-
-                    override fun onError(anError: ANError?) {
-                        Globals.logError(anError)
-                    }
-                })
-        }
     }
 }

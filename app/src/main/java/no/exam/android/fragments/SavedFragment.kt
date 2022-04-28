@@ -1,12 +1,11 @@
 package no.exam.android.fragments
 
 import android.annotation.SuppressLint
-import android.content.Context
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.TextView
 import androidx.fragment.app.Fragment
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -17,9 +16,7 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import no.exam.android.Globals
 import no.exam.android.R
-import no.exam.android.activities.MainActivity
 import no.exam.android.adapters.ParentAdapter
 import no.exam.android.entities.ImageEntity
 import no.exam.android.repo.ImageRepo
@@ -54,6 +51,12 @@ class SavedFragment : Fragment() {
 
         scope.launch(IO) {
             val items = database.findAll(ORIGINALS)
+            if (items.isEmpty()) {
+                withContext(Main) {
+                    fragmentView.findViewById<TextView>(R.id.text)
+                        .visibility = View.VISIBLE
+                }
+            }
 
             val itemList = ArrayList<Pair<ImageEntity, MutableList<ImageEntity>>>()
             items.forEach {

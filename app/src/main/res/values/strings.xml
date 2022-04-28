@@ -15,4 +15,5 @@
     <string name="saved_parent_tag">SAVED_PARENT</string>
     <string name="delete_button_text">DELETE</string>
     <string name="save_button_text">SAVE</string>
+    <string name="no_saved_images_found">No saved images found.</string>
 </resources>

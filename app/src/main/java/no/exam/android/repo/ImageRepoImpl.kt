@@ -5,16 +5,13 @@ import android.content.ContentValues
 import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
-import android.graphics.Bitmap
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
 import no.exam.android.entities.ImageEntity
 import no.exam.android.models.Image
-import no.exam.android.models.ParentItem
 import no.exam.android.repo.ImageRepo.Table
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
-import no.exam.android.utils.ImageUtil
 import javax.inject.Inject
 
 class ImageRepoImpl
@@ -61,23 +58,6 @@ class ImageRepoImpl
         }, "id = ?", arrayOf("0"))
     }
 
-    override suspend fun findAllSaved(): ArrayList<ParentItem> {
-        val cursor = readableDatabase.rawQuery(
-            "select * from originals", null
-        )
-        val parentItems = arrayListOf<ParentItem>()
-        while (cursor.moveToNext()) {
-            val bitmap = ImageUtil.bytesToBitmap(cursor.getBlob(1))
-
-            val saved = findSavedByOriginalId(SAVED_IMAGES, cursor.getInt(0))
-
-            val savedList = arrayListOf<Bitmap>()
-            savedList.addAll(saved.map { ImageUtil.bytesToBitmap(it.bytes) })
-            parentItems += ParentItem(bitmap, savedList)
-        }
-        return parentItems
-    }
-
     override suspend fun deleteById(id: Int, table: Table) = withContext(IO) {
         writableDatabase.delete(
             table.name.lowercase(),
@@ -96,26 +76,6 @@ class ImageRepoImpl
             list += run {
                 val id = cursor.getInt(0)
                 val blob = cursor.getBlob(1)
-                var originalId: Int? = null
-                if (table == SAVED_IMAGES) {
-                    originalId = cursor.getInt(2)
-                }
-                ImageEntity(id, blob, originalId)
-            }
-        }
-        return list
-    }
-
-    override suspend fun findSavedByOriginalId(table: Table, originalId: Int): List<ImageEntity> {
-        val cursor = readableDatabase.rawQuery(
-            "select * from saved_images " +
-                    "where original = ?", arrayOf(originalId.toString())
-        )
-        val list = mutableListOf<ImageEntity>()
-        while (cursor.moveToNext()) {
-            list += run {
-                val id = cursor.getInt(0)
-                val blob = cursor.getBlob(1)
                 ImageEntity(id, blob)
             }
         }
@@ -123,7 +83,11 @@ class ImageRepoImpl
     }
 
     @SuppressLint("Recycle")
-    override suspend fun findByWhere(table: Table, where: String, arg: String): ArrayList<ImageEntity> {
+    override suspend fun findByWhere(
+        table: Table,
+        where: String,
+        arg: String
+    ): ArrayList<ImageEntity> {
         val cursor = readableDatabase.query(
             table.name.lowercase(),
             arrayOf("id", "image"),

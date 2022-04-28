@@ -38,7 +38,9 @@ class ParentAdapter @Inject constructor(
         val images = holder.images
         images.layoutManager = LinearLayoutManager(context, HORIZONTAL, false)
         images.setHasFixedSize(false)
-        images.adapter = ImageAdapter(parentItem.second.map { ImageUtil.bytesToBitmap(it.bytes) })
+        val imageAdapter = ImageAdapter(parentItem.second.map { ImageUtil.bytesToBitmap(it.bytes) })
+        imageAdapter.parentPos = position
+        images.adapter = imageAdapter
     }
 
     override fun getItemCount(): Int {

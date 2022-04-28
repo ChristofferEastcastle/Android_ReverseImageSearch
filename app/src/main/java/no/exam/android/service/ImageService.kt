@@ -14,6 +14,7 @@ import kotlinx.coroutines.*
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.Dispatchers.Main
 import no.exam.android.Globals.Companion.API_URL
+import no.exam.android.entities.ImageEntity
 import no.exam.android.models.Image
 import no.exam.android.repo.ImageRepo
 import no.exam.android.utils.ImageUtil
@@ -28,7 +29,7 @@ class ImageService
     var isLoadingImages = MutableLiveData<Boolean>()
     val bitmapResults = ArrayList<Bitmap>()
     private val endpoints = listOf("google", "bing", "tineye")
-
+    var saved = ArrayList<Pair<ImageEntity, MutableList<ImageEntity>>>()
     @Inject
     lateinit var database: ImageRepo
     private val scope = MainScope()

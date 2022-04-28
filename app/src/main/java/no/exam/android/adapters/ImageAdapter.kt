@@ -17,6 +17,7 @@ class ImageAdapter(private val imageList: List<Bitmap>) :
     RecyclerView.Adapter<ImageAdapter.ViewHolder>() {
 
     var viewGroup: ViewGroup? = null
+    var parentPos: Int? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): ViewHolder {
         val itemView = LayoutInflater.from(parent.context).inflate(
@@ -47,6 +48,9 @@ class ImageAdapter(private val imageList: List<Bitmap>) :
         val stream = ByteArrayOutputStream()
         image.compress(PNG, 100, stream)
         intent.putExtra("IMAGE", stream.toByteArray())
+        intent.putExtra("PARENT_POSITION", parentPos)
+        intent.putExtra("POSITION", position)
+
         startActivity(viewGroup!!.context, intent, null)
     }
 

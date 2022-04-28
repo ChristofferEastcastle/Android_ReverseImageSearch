@@ -1,7 +1,9 @@
 package no.exam.android.fragments
 
 import android.annotation.SuppressLint
+import android.content.Context
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -15,27 +17,37 @@ import kotlinx.coroutines.Dispatchers.Main
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import no.exam.android.Globals
 import no.exam.android.R
+import no.exam.android.activities.MainActivity
 import no.exam.android.adapters.ParentAdapter
 import no.exam.android.entities.ImageEntity
 import no.exam.android.repo.ImageRepo
 import no.exam.android.repo.ImageRepo.Table.ORIGINALS
 import no.exam.android.repo.ImageRepo.Table.SAVED_IMAGES
+import no.exam.android.service.ImageService
 import javax.inject.Inject
 
 @AndroidEntryPoint
 class SavedFragment : Fragment() {
     private lateinit var scope: CoroutineScope
-    @Inject lateinit var database: ImageRepo
+
+    @Inject
+    lateinit var database: ImageRepo
+
+    @Inject
+    lateinit var imageService: ImageService
+    private lateinit var fragmentView: View
+
     @SuppressLint("Recycle")
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
-    ): View? {
+    ): View {
         scope = MainScope()
-        val view = inflater.inflate(R.layout.fragment_saved, container, false)
-        val recyclerView = view.findViewById<RecyclerView>(R.id.RecyclerView)
+        fragmentView = inflater.inflate(R.layout.fragment_saved, container, false)
+        val recyclerView = fragmentView.findViewById<RecyclerView>(R.id.RecyclerView)
         recyclerView.layoutManager = LinearLayoutManager(requireContext())
         recyclerView.setHasFixedSize(false)
         recyclerView.adapter = ParentAdapter(arrayListOf(), requireContext())
@@ -48,11 +60,17 @@ class SavedFragment : Fragment() {
                 val saved = database.findByWhere(SAVED_IMAGES, "original = ?", it.id.toString())
                 itemList.add(Pair(it, saved))
             }
-
+            imageService.saved = itemList
             withContext(Main) {
                 recyclerView.adapter = ParentAdapter(itemList, requireContext())
             }
         }
-        return view
+        return fragmentView
+    }
+
+    override fun onResume() {
+        super.onResume()
+        fragmentView.findViewById<RecyclerView>(R.id.RecyclerView)
+            .adapter = ParentAdapter(imageService.saved, requireContext())
     }
 }

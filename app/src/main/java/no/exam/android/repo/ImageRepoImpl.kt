@@ -6,7 +6,6 @@ import android.content.Context
 import android.database.sqlite.SQLiteDatabase
 import android.database.sqlite.SQLiteOpenHelper
 import android.graphics.Bitmap
-import dagger.hilt.android.AndroidEntryPoint
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers.IO
 import kotlinx.coroutines.withContext
@@ -43,6 +42,7 @@ class ImageRepoImpl
         }
     }
 
+    @SuppressLint("Recycle")
     override suspend fun findOriginalIdBasedOnCurrent(): Int {
         val rawQuery = readableDatabase.rawQuery(
             "select id from originals where image " +

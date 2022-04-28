@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+        <Button
+                android:id="@+id/UploadNewImageButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tag="@string/upload_new_tag"
+                android:onClick="switchFragments"
+                android:text="@string/upload_new" />
+
+        <Button
+                android:id="@+id/ResultsBtn"
+                android:onClick="switchFragments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tag="@string/results_tag"
+                android:text="@string/results" />
+
+        <Button
+                android:id="@+id/SavedBtn"
+                android:onClick="switchFragments"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:tag="@string/saved_tag"
+                android:text="@string/saved" />
+    </LinearLayout>
+

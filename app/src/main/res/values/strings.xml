@@ -1,0 +1,18 @@
+<resources>
+    <string name="app_name">ReverseImageSearch</string>
+    <string name="add_picture">Add Image</string>
+    <string name="results">Results</string>
+    <string name="add_new">Add New</string>
+    <string name="upload">Upload</string>
+    <string name="upload_new">Upload New</string>
+    <string name="saved">Saved</string>
+    <string name="no_image_found">No results found. Please upload an image.</string>
+    <string name="save_image">Save Image</string>
+    <string name="no_network">No network available.</string>
+    <string name="upload_new_tag">UPLOAD_NEW</string>
+    <string name="results_tag">RESULTS</string>
+    <string name="saved_tag">SAVED</string>
+    <string name="saved_parent_tag">SAVED_PARENT</string>
+    <string name="delete_button_text">DELETE</string>
+    <string name="save_button_text">SAVE</string>
+</resources>

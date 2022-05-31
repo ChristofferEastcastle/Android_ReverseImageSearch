@@ -1,3 +1,9 @@
 package no.exam.android.models
 
-data class Image(val image: Int)
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+@Parcelize
+class Image(val bytes: ByteArray) : Parcelable {
+
+}

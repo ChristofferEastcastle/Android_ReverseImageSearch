@@ -4,27 +4,30 @@
         xmlns:android="http://schemas.android.com/apk/res/android">
 
         <Button
-                android:id="@+id/AddNewBtn"
+                android:id="@+id/UploadNewImageButton"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:tag="1"
-                android:text="@string/add_new" />
+                android:tag="@string/upload_new_tag"
+                android:onClick="switchFragments"
+                android:text="@string/upload_new" />
 
         <Button
                 android:id="@+id/ResultsBtn"
+                android:onClick="switchFragments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:tag="2"
+                android:tag="@string/results_tag"
                 android:text="@string/results" />
 
         <Button
-                android:id="@+id/ShowAllBtn"
+                android:id="@+id/SavedBtn"
+                android:onClick="switchFragments"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:tag="3"
-                android:text="Show All" />
+                android:tag="@string/saved_tag"
+                android:text="@string/saved" />
     </LinearLayout>
 
